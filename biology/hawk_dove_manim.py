@@ -25,10 +25,91 @@ def division(n, d):
     return ['{', n, r'\over', d, '}']
 
 
+class GTtable(VMobject):
+    def __init__(self,
+                 table: list[list[str]],
+                 row_headers: list[str],
+                 col_headers: list[str],
+                 table_width: float = TABLE_WIDTH,
+                 table_height: float = TABLE_HEIGHT,
+                 rows: int = 2,
+                 cols: int = 2,
+                 **kwargs):
+        # initialize the vmobject
+        super().__init__(**kwargs)
+
+        self.rows = []
+
+        self.rows.append(VGroup(*[Rectangle(width=table_width/(rows+1), height=table_height/(cols+1)) for cell in range(cols)]).arrange(buff = 0.0))
+        for i in range(rows-1):
+            self.rows.append(self.rows[0].copy().next_to(self.rows[0+i], DOWN, buff=0.0))
+        
+        
+            
+
+        self.table = VGroup(*self.rows).move_to(ORIGIN)
+        self.add(self.table)
+        # coo = np.empty((3, 3), dtype=object)
+        # for i, row in enumerate(table):
+        #     for j, cell in enumerate(row):
+        #           coo[i][j] = cell.get_center()
+
+DecimalTable
+class GTtable2(Table):
+    def __init__(
+        self,
+        table: Iterable[Iterable[float | str | VMobject]],
+        row_labels: Iterable[VMobject] | None = None,
+        col_labels: Iterable[VMobject] | None = None,
+        top_left_entry: VMobject | None = None,
+        v_buff: float = 0.8,
+        h_buff: float = 1.3,
+        include_outer_lines: bool = False,
+        add_background_rectangles_to_entries: bool = False,
+        entries_background_color: Color = BLACK,
+        include_background_rectangle: bool = False,
+        background_rectangle_color: Color = BLACK,
+        element_to_mobject: Callable[
+            [float | str | VMobject],
+            VMobject,
+        ] = Paragraph,
+        element_to_mobject_config: dict = {},
+        arrange_in_grid_config: dict = {},
+        line_config: dict = {},
+        **kwargs,
+        ):
+        super().__init__(table: Iterable[Iterable[float | str | VMobject]],
+                         row_labels: Iterable[VMobject] | None = None,
+                         col_labels: Iterable[VMobject] | None = None,
+                         top_left_entry: VMobject | None = None,
+                         v_buff: float = 0.8,
+                         h_buff: float = 1.3,
+                         include_outer_lines: bool = False,
+                         add_background_rectangles_to_entries: bool = False,
+                         entries_background_color: Color = BLACK,
+                         include_background_rectangle: bool = False,
+                         background_rectangle_color: Color = BLACK,
+                         element_to_mobject: Callable[
+                             [float | str | VMobject],
+                             VMobject,
+                             ] = Paragraph,
+                         element_to_mobject_config: dict = {},
+                         arrange_in_grid_config: dict = {},
+                         line_config: dict = {},
+                         **kwargs,
+                         ):
+    
+    def set_value(self):
+        table
+
+
+class testos(Scene):
+    def construct(self):
+        table = GTtable()
+        self.play(FadeIn(table))
+
 # [r'{ {{N_a}}', ' \over ', '{{80}} }', ' = ', '{ {{N_d}}', ' \over ', '{{120}} }']
 class CreateHD(Scene):
-    
-
     def construct(self):
         calcs = [['EV_H = EV_D'],
                  [r'{{H}} \big( {V \over 2} - { C \over 2 } \big) + DV', '{{=}}', r'0 + { {{D}} \over 2 }'],
@@ -44,14 +125,12 @@ class CreateHD(Scene):
                  [r'V < C'],
                  [r'H > \frac{V}{C}'],
                  [r'H < \frac{V}{C}'])
-
-
-        # cells = []
-        # for i in range(3):
-        #     for j in range(3):
         
-        # test = Rectangle(width=TABLE_WIDTH/3, height=TABLE_HEIGHT/3)
-        # test2 = Rectangle(width=TABLE_WIDTH/3, height=TABLE_HEIGHT/3).align_on_border(test, LEFT)
+        # headers
+
+        recall_prisoners_dilemma = Text('Let\'s recall prisoner\'s dilemma.')
+        cooperation_and_altruism = Text('Cooperation and altruism').to_edge(UL)
+        
         cell_m = Rectangle(width=TABLE_WIDTH/3, height=TABLE_HEIGHT/3)
         cell_r = Rectangle(width=TABLE_WIDTH/3, height=TABLE_HEIGHT/3).next_to(cell_m, RIGHT, buff=0.0)
         cell_l = Rectangle(width=TABLE_WIDTH/3, height=TABLE_HEIGHT/3).next_to(cell_m, LEFT, buff=0.0)
@@ -73,7 +152,9 @@ class CreateHD(Scene):
         
         payoffs = [1, 1, 3, 0, 0, 3, 2, 2]
         payoffs_texts = [Text(str(payoff)) for payoff in payoffs]
-        payoffs_anim = payoffs.copy()
+        payoffs_fadein = payoffs.copy()
+        payoffs_fadeout = payoffs.copy()
+        
         # f_f_l = Text(str(payoffs[0])).move_to(coo[1,1]).shift(0.7*LEFT)
         # f_f_r = Text(str(payoffs[1])).move_to(coo[1,1]).shift(0.7*RIGHT)
         # f_s = Text(payoffs[1]).move_to(coo[1,2])
@@ -82,17 +163,20 @@ class CreateHD(Scene):
         
         lrud = [LEFT, RIGHT, UP, DOWN]
         for i, payoff in enumerate(payoffs_texts):
-            payoffs_anim[i] = FadeIn(payoff.move_to(coo[np.floor(i/4+1).astype(int), np.floor((i%4)/2).astype(int)+1]).shift(0.7*lrud[i % 2]))
+            payoffs_fadein[i] = FadeIn(payoff.move_to(coo[np.floor(i/4+1).astype(int), np.floor((i%4)/2).astype(int)+1]).shift(0.7*lrud[i % 2]))
+            payoffs_fadeout[i] = FadeOut(payoff.move_to(coo[np.floor(i/4+1).astype(int), np.floor((i%4)/2).astype(int)+1]).shift(0.7*lrud[i % 2]))
         
         
         text_below_table = Text('Once again, Prisoner\'s dilemma is \"a reason why we can\'t have nice things.\"', font_size=28).next_to(table.get_bottom(), DOWN).shift(DOWN)
         
+        self.play(Write(recall_prisoners_dilemma))
+        self.play(FadeOut(recall_prisoners_dilemma))
         self.play(FadeIn(table))
-        self.play(AnimationGroup(Create(text_fight_row), Create(text_share_row)))
-        self.play(AnimationGroup(Create(text_fight_col), Create(text_share_col)))
+        self.play(AnimationGroup(Write(text_fight_row), Write(text_share_row)))
+        self.play(AnimationGroup(Write(text_fight_col), Write(text_share_col)))
         
         for i in range(4):
-            self.play(AnimationGroup(*payoffs_anim[2*i:2*i+2]))
+            self.play(AnimationGroup(*payoffs_fadein[2*i:2*i+2]))
         # self.play(FadeIn(f_f_l))
         # self.play(FadeIn(f_f_r))
         # self.play(FadeIn(f_s))
@@ -101,8 +185,9 @@ class CreateHD(Scene):
         self.play(Indicate(VGroup(*payoffs_texts[0], *payoffs_texts[2])))
         self.play(Indicate(VGroup(*payoffs_texts[1], *payoffs_texts[5])))
         self.wait()
-        self.play(Create(text_below_table))
-        
+        self.play(Write(text_below_table))
+        self.play(AnimationGroup(*payoffs_fadeout, FadeOut(table), *[FadeOut(text) for text in payoffs_texts], FadeOut(text_fight_row)))
+        self.play(Write(cooperation_and_altruism))
         
         
         # t = Table([['2      2', '0      3'],
