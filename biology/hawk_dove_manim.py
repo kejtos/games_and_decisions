@@ -27,81 +27,68 @@ def division(n, d):
 
 class GTtable(VMobject):
     def __init__(self,
-                 table: list[list[str]],
+                 table: list[list[tuple[str] | str]],
                  row_headers: list[str],
                  col_headers: list[str],
                  table_width: float = TABLE_WIDTH,
                  table_height: float = TABLE_HEIGHT,
-                 rows: int = 2,
-                 cols: int = 2,
+                 n_rows: int = 2,
+                 n_cols: int = 2,
                  **kwargs):
-        # initialize the vmobject
         super().__init__(**kwargs)
 
         self.rows = []
+        for row in range(n_rows):
+            self.rows.append(VGroup(*[Rectangle(width=table_width/(n_rows+1), height=table_height/(n_cols+1)) for cell in range(n_cols)]).arrange(buff = 0.0))
 
-        self.rows.append(VGroup(*[Rectangle(width=table_width/(rows+1), height=table_height/(cols+1)) for cell in range(cols)]).arrange(buff = 0.0))
-        for i in range(rows-1):
+        for i in range(n_rows-1):
             self.rows.append(self.rows[0].copy().next_to(self.rows[0+i], DOWN, buff=0.0))
         
-        
-            
-
         self.table = VGroup(*self.rows).move_to(ORIGIN)
+        self.coos = np.empty((row_headers, col_headers), dtype=object)
+        self.left_coos = np.empty((row_headers, col_headers), dtype=object)
+        self.rigth_coos = np.empty((row_headers, col_headers), dtype=object)
+        for i, row in enumerate(self.rows):
+            for j, cell in enumerate(row):
+                self.coos[i][j] = cell.get_center()
+                self.left_coos[i][j] = cell.get_left()
+                self.rigth_coos[i][j] = cell.get_right()
+
+        self.texts = []
+        if len(cell) == 2:
+            for i, row in enumerate(table):
+                row_texts = []
+                for j, row in enumerate(n_rows):
+                    a, b = row
+                    a = Text(a).move_to( (self.rigth_coos[i][j]-self.left_coos[i][j])/3 + self.left_coos[i][j])
+                    b = Text(b).move_to( 2*(self.rigth_coos[i][j]-self.left_coos[i][j])/3 + self.left_coos[i][j])
+                    row_texts.append((a, b))
+                self.texts.append(row_texts)
+        else:
+            for i, row in enumerate(table):
+                for j, cell in row:
+                    cell = Text(a).move_to(self.coos[i][j])
+
+
         self.add(self.table)
-        # coo = np.empty((3, 3), dtype=object)
-        # for i, row in enumerate(table):
-        #     for j, cell in enumerate(row):
-        #           coo[i][j] = cell.get_center()
+
+
+    def get_cell_coos(self, row: int, col: int):
+        return self.coos[row][col].get_center()
+    
+    
+    def get_payoffs_coos(self, row: int, col: int):
+        return [self.coos[row][col][i].get_center() for i in range(2)]
+
+testos = GTtable([['0', '1'],
+                  ['2', '3']],
+                 row_headers=['a', 'b'],
+                 col_headers=['c', 'd'])
+
+
 
 DecimalTable
-class GTtable2(Table):
-    def __init__(
-        self,
-        table: Iterable[Iterable[float | str | VMobject]],
-        row_labels: Iterable[VMobject] | None = None,
-        col_labels: Iterable[VMobject] | None = None,
-        top_left_entry: VMobject | None = None,
-        v_buff: float = 0.8,
-        h_buff: float = 1.3,
-        include_outer_lines: bool = False,
-        add_background_rectangles_to_entries: bool = False,
-        entries_background_color: Color = BLACK,
-        include_background_rectangle: bool = False,
-        background_rectangle_color: Color = BLACK,
-        element_to_mobject: Callable[
-            [float | str | VMobject],
-            VMobject,
-        ] = Paragraph,
-        element_to_mobject_config: dict = {},
-        arrange_in_grid_config: dict = {},
-        line_config: dict = {},
-        **kwargs,
-        ):
-        super().__init__(table: Iterable[Iterable[float | str | VMobject]],
-                         row_labels: Iterable[VMobject] | None = None,
-                         col_labels: Iterable[VMobject] | None = None,
-                         top_left_entry: VMobject | None = None,
-                         v_buff: float = 0.8,
-                         h_buff: float = 1.3,
-                         include_outer_lines: bool = False,
-                         add_background_rectangles_to_entries: bool = False,
-                         entries_background_color: Color = BLACK,
-                         include_background_rectangle: bool = False,
-                         background_rectangle_color: Color = BLACK,
-                         element_to_mobject: Callable[
-                             [float | str | VMobject],
-                             VMobject,
-                             ] = Paragraph,
-                         element_to_mobject_config: dict = {},
-                         arrange_in_grid_config: dict = {},
-                         line_config: dict = {},
-                         **kwargs,
-                         ):
-    
-    def set_value(self):
-        table
-
+Table
 
 class testos(Scene):
     def construct(self):
@@ -139,16 +126,16 @@ class CreateHD(Scene):
         bot_row = mid_row.copy().next_to(mid_row, DOWN, buff=0.0)
         table = VGroup(top_row, mid_row, bot_row).shift(UP)
 
-        coo = np.empty((3, 3), dtype=object)
+        coos = np.empty((3, 3), dtype=object)
         for i, row in enumerate(table):
             for j, cell in enumerate(row):
-                  coo[i][j] = cell.get_center()
+                  coos[i][j] = cell.get_center()
         
-        text_fight_col = Text('Fight').move_to(coo[0, 1])
-        text_fight_row = Text('Fight').move_to(coo[1, 0])
+        text_fight_col = Text('Fight').move_to(coos[0, 1])
+        text_fight_row = Text('Fight').move_to(coos[1, 0])
         
-        text_share_col = Text('Share').move_to(coo[0, 2])
-        text_share_row = Text('Share').move_to(coo[2, 0])
+        text_share_col = Text('Share').move_to(coos[0, 2])
+        text_share_row = Text('Share').move_to(coos[2, 0])
         
         payoffs = [1, 1, 3, 0, 0, 3, 2, 2]
         payoffs_texts = [Text(str(payoff)) for payoff in payoffs]
@@ -163,8 +150,8 @@ class CreateHD(Scene):
         
         lrud = [LEFT, RIGHT, UP, DOWN]
         for i, payoff in enumerate(payoffs_texts):
-            payoffs_fadein[i] = FadeIn(payoff.move_to(coo[np.floor(i/4+1).astype(int), np.floor((i%4)/2).astype(int)+1]).shift(0.7*lrud[i % 2]))
-            payoffs_fadeout[i] = FadeOut(payoff.move_to(coo[np.floor(i/4+1).astype(int), np.floor((i%4)/2).astype(int)+1]).shift(0.7*lrud[i % 2]))
+            payoffs_fadein[i] = FadeIn(payoff.move_to(coos[np.floor(i/4+1).astype(int), np.floor((i%4)/2).astype(int)+1]).shift(0.7*lrud[i % 2]))
+            payoffs_fadeout[i] = FadeOut(payoff.move_to(coos[np.floor(i/4+1).astype(int), np.floor((i%4)/2).astype(int)+1]).shift(0.7*lrud[i % 2]))
         
         
         text_below_table = Text('Once again, Prisoner\'s dilemma is \"a reason why we can\'t have nice things.\"', font_size=28).next_to(table.get_bottom(), DOWN).shift(DOWN)
