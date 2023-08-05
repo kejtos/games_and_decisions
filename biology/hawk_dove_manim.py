@@ -25,9 +25,9 @@ def division(n, d):
     return ['{', n, r'\over', d, '}']
 
 
-class GTtable(VMobject):
+class GTtable(VMobject): # zatim fixed, v budoucnu zmenit velikost v zavislosti na textu
     def __init__(self,
-                 table: list[list[tuple[str] | str]],
+                 table_strs: list[list[tuple[str] | str]],
                  row_headers: list[str],
                  col_headers: list[str],
                  table_width: float = TABLE_WIDTH,
@@ -37,17 +37,34 @@ class GTtable(VMobject):
                  **kwargs):
         super().__init__(**kwargs)
 
-        self.rows = []
-        for row in range(n_rows):
-            self.rows.append(VGroup(*[Rectangle(width=table_width/(n_rows+1), height=table_height/(n_cols+1)) for cell in range(n_cols)]).arrange(buff = 0.0))
+        self.table_strs = table_strs
+        self.row_headers = row_headers
+        self.col_headers = col_headers
+        self.table_width = table_width
+        self.table_height = table_height
+        self.n_rows = n_rows
+        self.n_cols = n_cols
+
+        self.rows = [VGroup(*[Rectangle(width=table_width/(n_rows+1), height=table_height/(n_cols+1)) for cell in range(n_cols)]).arrange(buff = 0.0)]
 
         for i in range(n_rows-1):
             self.rows.append(self.rows[0].copy().next_to(self.rows[0+i], DOWN, buff=0.0))
-        
-        self.table = VGroup(*self.rows).move_to(ORIGIN)
-        self.coos = np.empty((row_headers, col_headers), dtype=object)
-        self.left_coos = np.empty((row_headers, col_headers), dtype=object)
-        self.rigth_coos = np.empty((row_headers, col_headers), dtype=object)
+
+        row_headers_cells = self.rows[0].copy().next_to(self.rows[0], UP, buff=0.0)
+        col_headers_cells = VGroup(*[row[0] for row in self.rows]).copy().next_to(self.rows[0][0], LEFT, buff=0.0).align_to(self.rows[0][0], UP)
+
+        self.table_frame = VGroup(*self.rows, row_headers_cells, col_headers_cells).move_to(ORIGIN)
+
+        self._set_header_coos(row_headers_cells, col_headers_cells)
+
+
+        row_headers_texts = [Text(text).move_to(header_coos[0][i]) for i, text in enumerate(row_headers)]
+        col_headers_texts = [Text(text).move_to(header_coos[1][i]) for i, text in enumerate(col_headers)]
+
+        coos = np.empty((n_rows, n_cols), dtype=object)
+        left_coos = np.empty((n_rows, n_cols), dtype=object)
+        rigth_coos = np.empty((n_rows, n_cols), dtype=object)
+
         for i, row in enumerate(self.rows):
             for j, cell in enumerate(row):
                 self.coos[i][j] = cell.get_center()
@@ -68,6 +85,92 @@ class GTtable(VMobject):
             for i, row in enumerate(table):
                 for j, cell in row:
                     cell = Text(a).move_to(self.coos[i][j])
+
+    def _set_header_coos(self, row_headers_cells, col_headers_cells):
+        self.header_coos = np.empty((n_rows, n_cols), dtype=object)
+        for i, row in enumerate(row_headers_cells):
+            self.header_coos[0][i] = row.get_center()
+
+        for i, col in enumerate(col_headers_cells):
+            self.header_coos[1][i] = col.get_center()
+
+
+    def _set_cell_coords(self):
+        coos = np.empty((self.n_rows, self.n_cols), dtype=object)
+        left_coos = np.empty((self.n_rows, self.n_cols), dtype=object)
+        right_coos = np.empty((self.n_rows, self.n_cols), dtype=object)
+
+        for i, row in enumerate(self.rows):
+            for j, cell in enumerate(row):
+                self.coos[i][j] = cell.get_center()
+                self.left_coos[i][j] = cell.get_left()
+                self.right_coos[i][j] = cell.get_right()
+
+########################################################################
+table_strs=[['0', '1'],['2', '3']]
+row_headers=['a', 'b']
+col_headers=['c', 'd']
+table_width = TABLE_WIDTH
+table_height = TABLE_HEIGHT
+n_rows = 2
+n_cols = 2
+
+rows = [VGroup(*[Rectangle(width=table_width/(n_rows+1), height=table_height/(n_cols+1)) for cell in range(n_cols)]).arrange(buff = 0.0)]
+
+for i in range(n_rows-1):
+    rows.append(rows[0].copy().next_to(rows[0+i], DOWN, buff=0.0))
+
+row_headers_cells = rows[0].copy().next_to(rows[0], UP, buff=0.0)
+col_headers_cells = VGroup(*[row[0] for row in rows]).copy().next_to(rows[0][0], LEFT, buff=0.0).align_to(rows[0][0], UP)
+
+table_body = VGroup(*rows, row_headers_cells, col_headers_cells).move_to(ORIGIN)
+
+header_coos = np.empty((n_rows, n_cols), dtype=object)
+for i, row in enumerate(row_headers_cells):
+    header_coos[0][i] = row.get_center()
+
+for i, col in enumerate(col_headers_cells):
+    header_coos[1][i] = col.get_center()
+
+row_headers_texts = [Text(text).move_to(header_coos[0][i]) for i, text in enumerate(row_headers)]
+col_headers_texts = [Text(text).move_to(header_coos[1][i]) for i, text in enumerate(col_headers)]
+
+coos = np.empty((n_rows, n_cols), dtype=object)
+left_coos = np.empty((n_rows, n_cols), dtype=object)
+rigth_coos = np.empty((n_rows, n_cols), dtype=object)
+
+
+def _put_payoffs_in():
+    texts = []
+    for i, (row, row_str) in enumerate(zip(rows, table_strs)):
+        for j, (cell, cell_strs) in enumerate(zip(row, row_str)):
+            coos[i][j] = cell.get_center()
+            left_coos[i][j] = cell.get_left()
+            rigth_coos[i][j] = cell.get_right()
+            # if len(cell_texts) == 2:
+            cell_texts = []
+            n_payoffs = len(cell_strs)
+            payoff_space = (rigth_coos[i][j]-left_coos[i][j])/(n_payoffs+1)
+            for k, cell_str in enumerate(cell_strs, 1):
+                payoffs = []
+                payoffs.append(Text(cell_str).move_to(left_coos[i][j] + k*payoff_space))
+                cell_texts.append(tuple(*payoffs))
+            texts.append(cell_texts)
+    return(texts)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         self.add(self.table)
