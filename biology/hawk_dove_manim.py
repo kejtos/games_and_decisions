@@ -51,13 +51,13 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
         for i in range(n_rows-1):
             self.rows.append(self.rows[0].copy().next_to(self.rows[0+i], DOWN, buff=0.0))
 
-        if self.row_headers:
-            self.row_headers_cells = self.rows[0].copy().next_to(self.rows[0], UP, buff=0.0)
-
         if self.col_headers:
-            self.col_headers_cells = VGroup(*[row[0] for row in self.rows]).copy().next_to(self.rows[0][0], LEFT, buff=0.0).align_to(self.rows[0][0], UP)
+            self.col_headers_cells = self.rows[0].copy().next_to(self.rows[0], UP, buff=0.0)
 
-        self.frame = VGroup(*self.rows, self.row_headers_cells, self.col_headers_cells).move_to(ORIGIN)
+        if self.row_headers:
+            self.row_headers_cells = VGroup(*[row[0] for row in self.rows]).copy().next_to(self.rows[0][0], LEFT, buff=0.0).align_to(self.rows[0][0], UP)
+
+        self.frame = VGroup(*self.rows, self.col_headers_cells, self.row_headers_cells).move_to(ORIGIN)
 
         self._set_header_coos()
         self._set_cell_coos()
@@ -70,11 +70,11 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
 
     def _set_header_coos(self):
         self.header_coos = np.empty((self.n_rows, self.n_cols), dtype=object)
-        if self.row_headers_cells:
+        if self.row_headers:
             for i, row in enumerate(self.row_headers_cells):
                 self.header_coos[0][i] = row.get_center()
 
-        if self.col_headers_cells:
+        if self.col_headers:
             for i, col in enumerate(self.col_headers_cells):
                 self.header_coos[1][i] = col.get_center()
 
@@ -122,8 +122,8 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
 
 
     def _set_header_texts(self):
-        self.row_headers_texts = [Text(text).move_to(self.header_coos[0][i]) for i, text in enumerate(self.row_headers)]
-        self.col_headers_texts = [Text(text).move_to(self.header_coos[1][i]) for i, text in enumerate(self.row_headers)]
+        self.row_headers_texts = [Text(header).move_to(self.header_coos[0][i]) for i, header in enumerate(self.row_headers)]
+        self.col_headers_texts = [Text(header).move_to(self.header_coos[1][i]) for i, header in enumerate(self.col_headers)]
 
 
     def _update_coos(self):
@@ -246,7 +246,7 @@ class CreateHD(Scene):
                  [r'{{H}} {{V}} {{- HC}}', '{{=}}', 'HV-{{V}}'],
                  [r'{{- HC}}', '{{=}}', '-{{V}}'],
                  [r'{{HC}}', '{{=}}', '{{V}}'],
-                 [r'H ', '{{=}}', '{V \over C}']]
+                 [r'H', '{{=}}', '{V \over C}']]
         
         conds = ([r'V > C'],
                  [r'V < C'],
