@@ -155,23 +155,48 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
 
 
     def get_payoff_coos(self, row: int, col: int):
-        return([self.all_payoffs[row][col][i].get_center() for i in range(self.n_payoffs)])
+        return [self.all_payoffs[row][col][i].get_center() for i in range(self.n_payoffs)]
 
 
-    def get_payoffs(self):
-        return(self.all_payoffs)
+    def get_payoffs(self, row: Optional[int]=None, col: Optional[int]=None, pos: Optional[int]=None):
+        if row is None and col is None and pos is None:
+            return self.all_payoffs
+        
+        if row is not None and col is not None and pos is not None:
+            return self.all_payoffs[row][col][pos]
+        
+        row_range = range(len(self.all_payoffs)) if row is None else [row]
+        col_range = range(len(self.all_payoffs[0])) if col is None else [col]
+        pos_range = range(len(self.all_payoffs[0][0])) if pos is None else [pos]
+
+        if row is not None and col is None and pos is None:
+            return [self.all_payoffs[r] for r in row_range]
+        
+        if row is None and col is not None and pos is None:
+            return [[self.all_payoffs[r][c] for r in row_range] for c in col_range]
+        
+        if row is None and col is None and pos is not None:
+            return [[[self.all_payoffs[r][c][p] for c in col_range] for r in row_range] for p in pos_range]
+        
+        return [[[self.all_payoffs[r][c][p] for p in pos_range] for c in col_range] for r in row_range]
 
 
     def get_payoffs_as_list(self):
-        return(self.list_all_payoffs)
+        return self.list_all_payoffs
 
 
-    def get_row_headers(self):
-        return(self.row_headers_texts)
+    def get_row_headers(self, row: Optional[int] = None):
+        if row is None:
+            return self.row_headers_texts
+        else:
+            return self.row_headers_texts[row]
 
 
-    def get_col_headers(self):
-        return(self.col_headers_texts)
+    def get_col_headers(self, col: Optional[int] = None):
+        if col is None:
+            return(self.col_headers_texts)
+        else:
+            return(self.col_headers_texts[col])
 
 
     def update_header(self, row_col: str, pos: int, new_header: str):
@@ -190,52 +215,7 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
         self.all_payoffs[row][col][pos].become(new_payoff.move_to(self.all_payoffs[row][col][pos]))
         self.all_payoffs[row][col][pos] = new_payoff.move_to(self.all_payoffs[row][col][pos])
 
-# n_cols = 2
-# n_rows = 2
-# rows = [VGroup(*[Rectangle(width=TABLE_WIDTH/(n_rows+1), height=TABLE_HEIGHT/(n_cols+1)) for cell in range(n_cols)]).arrange(buff = 0.0)]
 
-# for i in range(n_rows-1):
-#     rows.append(rows[0].copy().next_to(rows[0+i], DOWN, buff=0.0))
-
-# coos = np.empty((n_rows, n_cols), dtype=object)
-# left_coos = np.empty((n_rows, n_cols), dtype=object)
-# rigth_coos = np.empty((n_rows, n_cols), dtype=object)
-# for i, row in enumerate(rows):
-#     for j, cell in enumerate(row):
-#         coos[i][j] = cell.get_center()
-#         left_coos[i][j] = cell.get_left()
-#         rigth_coos[i][j] = cell.get_right()
-
-
-# all_payoffs = []
-# for i, row_str in enumerate(table_strs):
-#     row_payoffs = []
-#     for j, input_payoffs in enumerate(row_str):
-#         n_payoffs = len(input_payoffs)
-#         payoff_space = (rigth_coos[i][j]-left_coos[i][j])/(n_payoffs+1)
-#         payoffs = []
-#         if type(input_payoffs) in (list, tuple):
-#             for k, payoff in enumerate(input_payoffs, 1):
-#                 if isinstance(payoff, str):
-#                     payoff = Text(payoff)
-#                 payoffs.append(payoff.move_to(left_coos[i][j] + k*payoff_space))
-#         else:
-#             if isinstance(input_payoffs, str):
-#                 payoff = Text(payoff)
-#             payoffs.append(input_payoffs.move_to(left_coos[i][j] + payoff_space))
-#         row_payoffs.append(payoffs)
-#     all_payoffs.append(row_payoffs)
-
-
-
-# list_all_payoffs = []
-# for i in range(n_rows):
-#     for j in range(n_cols):
-#         for k in range(n_payoffs):
-#             list_all_payoffs.append(all_payoffs[i][j][k])
-
-
-# [r'{ {{N_a}}', ' \over ', '{{80}} }', ' = ', '{ {{N_d}}', ' \over ', '{{120}} }']
 class CreateHD(Scene):
     def construct(self):
         calcs = [['EV_H = EV_D'],
@@ -255,27 +235,25 @@ class CreateHD(Scene):
         
         # headers
         
-        t1 = GTtable(table_strs=[[('1', '1'), ('3', '0')], [('0', '3'), ('2', '2')]],
-                    row_headers=['Fight', 'Share'],
-                    col_headers=['Fight', 'Share'],
-                    table_width = TABLE_WIDTH,
-                    table_height = TABLE_HEIGHT,
-                    n_rows = 2,
-                    n_cols = 2).shift(UP)
+        table_1 = GTtable(table_strs=[[('1', '1'), ('3', '0')], [('0', '3'), ('2', '2')]],
+                          row_headers=['Fight', 'Share'],
+                          col_headers=['Fight', 'Share'],
+                          table_width = TABLE_WIDTH,
+                          table_height = TABLE_HEIGHT,
+                          n_rows = 2,
+                          n_cols = 2).shift(UP)
 
-        t1.get_cell_coos(0,0)
-
-        payoffs = t1.get_payoffs()
-        row_headers = t1.get_row_headers()
-        col_headers = t1.get_col_headers()
+        payoffs = table_1.get_payoffs()
+        row_headers = table_1.get_row_headers()
+        col_headers = table_1.get_col_headers()
         recall_prisoners_dilemma = Text('Let\'s recall prisoner\'s dilemma.')
         cooperation_and_altruism = Text('Cooperation and altruism').to_edge(UL)
 
-        text_below_table = Text('Once again, Prisoner\'s dilemma is \"a reason why we can\'t have nice things.\"', font_size=28).next_to(t1.frame.get_bottom(), DOWN).shift(DOWN)
+        text_below_table = Text('Once again, Prisoner\'s dilemma is \"a reason why we can\'t have nice things.\"', font_size=28).next_to(table_1.frame.get_bottom(), DOWN).shift(DOWN)
 
         self.play(Write(recall_prisoners_dilemma))
         self.play(FadeOut(recall_prisoners_dilemma))
-        self.play(FadeIn(t1.frame))
+        self.play(FadeIn(table_1.frame))
 
         self.play(AnimationGroup(Write(row_headers[0]), Write(row_headers[1])))
         self.play(AnimationGroup(Write(col_headers[0]), Write(col_headers[1])))
@@ -290,7 +268,7 @@ class CreateHD(Scene):
         self.play(Indicate(VGroup(payoffs[0][0][0], payoffs[0][0][1])))
 
         self.play(Write(text_below_table))
-        self.play(FadeOut(VGroup(t1, text_below_table)))
+        self.play(FadeOut(VGroup(table_1, text_below_table)))
         self.play(Write(cooperation_and_altruism))
         self.play(FadeOut(cooperation_and_altruism))
 
@@ -299,7 +277,7 @@ class CreateHD(Scene):
         dove_fight = MathTex('0')
         dove_share = MathTex(*division('{{V}}', '2'))
 
-        t2 = GTtable(table_strs=[[hawk_fight, hawk_share], [dove_fight, dove_share]],
+        table_2 = GTtable(table_strs=[[hawk_fight, hawk_share], [dove_fight, dove_share]],
                     row_headers=['Hawk meets', 'Dove meets'],
                     col_headers=['Hawk', 'Dove'],
                     table_width = TABLE_WIDTH,
@@ -317,26 +295,33 @@ class CreateHD(Scene):
         doves_desc = MathTex(r'\text{--- The proportion of doves}').save_state()
         one_minus_hawks = MathTex('1 - H').save_state()
         
-        value_desc.next_to(t2.frame, DOWN)
+        value_desc.next_to(table_2.frame, DOWN).align_to(table_2.frame, LEFT) # předelat a animovat
         value.next_to(value_desc, LEFT)
         cost.next_to(value, DOWN)
         cost_desc.next_to(cost, RIGHT)
-        
-        self.play(FadeIn(t2.frame))
-        
-        self.play(Write(t2.get_row_headers()[0]))
-        self.play(Write(t2.get_row_headers()[1]))
-        self.play(Write(t2.get_col_headers()[0]))
-        self.play(Write(t2.get_col_headers()[1]))
+        hawks.next_to(value_desc, buff=1)
+        hawks_desc.next_to(hawks, RIGHT)
+        doves.next_to(hawks, DOWN)
+        doves_desc.next_to(doves, buff=1)
+
+        self.play(FadeIn(table_2.frame))
+
+        self.play(Write(table_2.get_row_headers(0)))
+        self.play(Write(table_2.get_row_headers(1)))
+        self.play(Write(table_2.get_col_headers(0)))
+        self.play(Write(table_2.get_col_headers(1)))
 
         self.play(Write(VGroup(value, value_desc)))
         self.play(Write(VGroup(cost, cost_desc)))
 
-        self.play(TransformMatchingTex(VGroup(value.copy(), cost.copy()), t2.get_payoffs()[0][0][0]))
-        self.play(TransformMatchingTex(value.copy(), t2.get_payoffs()[0][1][0]))
-        self.play(Create(t2.get_payoffs()[1][0][0]))
-        self.play(TransformMatchingTex(value.copy(), t2.get_payoffs()[1][1][0]))
+        self.play(TransformMatchingTex(VGroup(value.copy(), cost.copy()), table_2.get_payoffs(0,0,0)))
+        self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(0,1,0)))
+        self.play(Create(table_2.get_payoffs(1,0,0)))
+        self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(1,1,0)))
         
+        ext_table = VGroup(table_2, value_desc, value, cost, cost_desc)
+
+        self.play(ext_table.animate.scale(0.5).to_edge(UR))
 
         calc_eqs = []
         for i, calc in enumerate(calcs):
