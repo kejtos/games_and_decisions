@@ -295,8 +295,8 @@ class CreateHD(Scene):
         doves_desc = MathTex(r'\text{--- The proportion of doves}').save_state()
         one_minus_hawks = MathTex('1 - H').save_state()
         
-        value_desc.next_to(table_2.frame, DOWN).align_to(table_2.frame, LEFT) # předelat a animovat
-        value.next_to(value_desc, LEFT)
+        value.next_to(table_2.frame, DOWN).align_to(table_2.frame, LEFT)
+        value_desc.next_to(value, RIGHT)
         cost.next_to(value, DOWN)
         cost_desc.next_to(cost, RIGHT)
         hawks.next_to(value_desc, buff=1)
@@ -313,13 +313,15 @@ class CreateHD(Scene):
 
         self.play(Write(VGroup(value, value_desc)))
         self.play(Write(VGroup(cost, cost_desc)))
+        self.play(Write(VGroup(hawks, hawks_desc)))
+        self.play(Write(VGroup(doves, doves_desc)))
 
         self.play(TransformMatchingTex(VGroup(value.copy(), cost.copy()), table_2.get_payoffs(0,0,0)))
         self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(0,1,0)))
         self.play(Create(table_2.get_payoffs(1,0,0)))
         self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(1,1,0)))
-        
-        ext_table = VGroup(table_2, value_desc, value, cost, cost_desc)
+
+        ext_table = VGroup(table_2, value_desc, value, cost, cost_desc, hawks, hawks_desc, doves, doves_desc)
 
         self.play(ext_table.animate.scale(0.5).to_edge(UR))
 
