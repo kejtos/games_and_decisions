@@ -289,11 +289,11 @@ class CreateHD(Scene):
         cost = MathTex('{{C}}').save_state()
         hawks = MathTex('{{H}}').save_state()
         doves = MathTex('{{D}}').save_state()
-        value_desc = MathTex(r'\text{--- Value or payoff}').save_state()
-        cost_desc = MathTex(r'\text{--- Cost}').save_state()
-        hawks_desc = MathTex(r'\text{--- The proportion of hawks}').save_state()
-        doves_desc = MathTex(r'\text{--- The proportion of doves}').save_state()
-        one_minus_hawks = MathTex('1 - H').save_state()
+        value_desc = MathTex(r'\text{--- Value or payoff}').scale(0.8).save_state()
+        cost_desc = MathTex(r'\text{--- Cost}').scale(0.8).save_state()
+        hawks_desc = MathTex(r'\text{--- The proportion of hawks}').scale(0.8).save_state()
+        doves_desc = MathTex(r'\text{--- The proportion of doves}').scale(0.8).save_state()
+        one_minus_hawks = MathTex('1 - H').scale(0.8).save_state()
         
         value.next_to(table_2.frame, DOWN).align_to(table_2.frame, LEFT)
         value_desc.next_to(value, RIGHT)
@@ -302,7 +302,7 @@ class CreateHD(Scene):
         hawks.next_to(value_desc, buff=1)
         hawks_desc.next_to(hawks, RIGHT)
         doves.next_to(hawks, DOWN)
-        doves_desc.next_to(doves, buff=1)
+        doves_desc.next_to(doves)
 
         self.play(FadeIn(table_2.frame))
 
