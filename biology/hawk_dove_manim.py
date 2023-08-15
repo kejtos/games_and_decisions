@@ -1,7 +1,9 @@
 from manim import *
 from manim.opengl import *
+import cv2
 import numpy as np
 from typing import Optional
+from scipy.integrate import odeint
 
 X_MOVE = 5.5
 Y_MOVE = 2
@@ -234,7 +236,7 @@ class CreateHD(Scene):
                  [r'H < \frac{V}{C}'])
         
         # headers
-        
+
         table_1 = GTtable(table_strs=[[('1', '1'), ('3', '0')], [('0', '3'), ('2', '2')]],
                           row_headers=['Fight', 'Share'],
                           col_headers=['Fight', 'Share'],
@@ -289,12 +291,34 @@ class CreateHD(Scene):
         cost = MathTex('{{C}}').save_state()
         hawks = MathTex('{{H}}').save_state()
         doves = MathTex('{{D}}').save_state()
-        value_desc = MathTex(r'\text{--- Value or payoff}').scale(0.8).save_state()
-        cost_desc = MathTex(r'\text{--- Cost}').scale(0.8).save_state()
-        hawks_desc = MathTex(r'\text{--- The proportion of hawks}').scale(0.8).save_state()
-        doves_desc = MathTex(r'\text{--- The proportion of doves}').scale(0.8).save_state()
-        one_minus_hawks = MathTex('1 - H').scale(0.8).save_state()
+        value_desc = MathTex(r'\text{--- Value or payoff}').scale(0.75).save_state()
+        cost_desc = MathTex(r'\text{--- Cost}').scale(0.75).save_state()
+        hawks_desc = MathTex(r'\text{--- The proportion of hawks}').scale(0.75).save_state()
+        doves_desc = MathTex(r'\text{--- The proportion of doves}').scale(0.75).save_state()
+        one_minus_hawks = MathTex('1 - H').scale(0.75).save_state()
         
+        rabbits = MathTex(r'\text{Rabbits:}').scale(0.75).save_state()
+        rabbits_eq = MathTex(*division('dx', 'dt'), '=', r'\alpha x', '-', r'\beta xy')
+        foxes = MathTex('Foxes:').scale(0.75).save_state()
+        foxes_eq = MathTex(*division('dy', 'dt'), '=', r'\gamma xy', '-', r'\delta y')
+
+        pp_conds = [['x', 'y', 't', division('dx', 'dt'), division('dy', 'dt'), r'\alpha', r'\beta', r'\gamma', r'\delta'],
+                    [r'\text{--- number of rabbits per square km}', r'\text{--- number of foxes per square km}', r'\text{--- time}', r'\text{--- growth rate of rabbits}', r'\text{--- growth rate of rabbits}',
+                     r'\text{--- maximum growth rate of rabbits}', r'\text{--- effect of foxes on the growth rate of rabbits}', r'\text{--- effect of rabbits on the growth rate of foxes}', r'\text{--- death rate of foxes}']]
+        
+        pp_conds_mtex = []
+        pp_conds_mtex.append((MathTex(pp_conds[0][0]).scale(0.75).move_to([1, 3, 0]),
+                              MathTex(pp_conds[1][0]).scale(0.75).move_to([2, 3, 0])))
+
+        for i, _ in enumerate(pp_conds[0][1:]):
+            if isinstance(pp_conds[0][i], list):
+                pp_conds_mtex.append((MathTex(*pp_conds[0][i]).scale(0.75).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
+                                      MathTex(pp_conds[1][i]).scale(0.75).align_to(pp_conds_mtex[i-1][1], LEFT).next_to(pp_conds_mtex[i-1][1], DOWN)))
+            else:
+                pp_conds_mtex.append((MathTex(pp_conds[0][i]).scale(0.75).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
+                                      MathTex(pp_conds[1][i]).scale(0.75).align_to(pp_conds_mtex[i-1][1], LEFT).next_to(pp_conds_mtex[i-1][1], DOWN)))
+
+
         value.next_to(table_2.frame, DOWN).align_to(table_2.frame, LEFT)
         value_desc.next_to(value, RIGHT)
         cost.next_to(value, DOWN)
@@ -304,6 +328,7 @@ class CreateHD(Scene):
         doves.next_to(hawks, DOWN)
         doves_desc.next_to(doves)
 
+        
         self.play(FadeIn(table_2.frame))
 
         self.play(Write(table_2.get_row_headers(0)))
@@ -327,14 +352,19 @@ class CreateHD(Scene):
 
         calc_eqs = []
         for i, calc in enumerate(calcs):
-            self.wait()
+            # self.wait()
             calc_eqs.append(MathTex(*calc).scale(DEF_SCALE).move_to([-4,3,0]))
             if i == 0:
                 self.play(Create(*calc_eqs[i]))
             else:
                 calc_eqs[i].next_to(calc_eqs[i-1], DOWN)
                 self.play(TransformMatchingTex(calc_eqs[i-1].copy(), calc_eqs[i]))
-                # self.play(TransformMatchingShapes(*calc_eqs[i:i+2]))
-        
+                 # self.play(TransformMatchingShapes(*calc_eqs[i:i+2]))
 
+        
+        self.play(FadeOut(VGroup(*calc_eqs, ext_table)))
+        
+        for i, _ in enumerate(pp_conds_mtex):
+            self.play([AnimationGroup(textos, textos2) for textos, textos2 in pp_conds_mtex[i])
+        
         self.wait(PAUSE)
