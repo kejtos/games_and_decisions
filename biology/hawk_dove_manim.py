@@ -23,7 +23,8 @@ DECS = (2, 0, 0, 2, 0)
 DEF_COL = BLUE_D
 TABLE_WIDTH = 10.0
 TABLE_HEIGHT = 5.0
-
+FONT_SIZE_PREDATOR_PREY = 26
+FONT_SIZE_GENERAL = 36
 def division(n, d):
     return ['{', n, r'\over', d, '}']
 
@@ -291,15 +292,15 @@ class CreateHD(Scene):
         cost = MathTex('{{C}}').save_state()
         hawks = MathTex('{{H}}').save_state()
         doves = MathTex('{{D}}').save_state()
-        value_desc = MathTex(r'\text{--- Value or payoff}').scale(0.75).save_state()
-        cost_desc = MathTex(r'\text{--- Cost}').scale(0.75).save_state()
-        hawks_desc = MathTex(r'\text{--- The proportion of hawks}').scale(0.75).save_state()
-        doves_desc = MathTex(r'\text{--- The proportion of doves}').scale(0.75).save_state()
-        one_minus_hawks = MathTex('1 - H').scale(0.75).save_state()
+        value_desc = MathTex(r'\text{--- Value or payoff}', font_size=FONT_SIZE_GENERAL).save_state()
+        cost_desc = MathTex(r'\text{--- Cost}', font_size=FONT_SIZE_GENERAL).save_state()
+        hawks_desc = MathTex(r'\text{--- The proportion of hawks}', font_size=FONT_SIZE_GENERAL).save_state()
+        doves_desc = MathTex(r'\text{--- The proportion of doves}', font_size=FONT_SIZE_GENERAL).save_state()
+        one_minus_hawks = MathTex('1 - H', font_size=FONT_SIZE_GENERAL).save_state()
         
-        rabbits = MathTex(r'\text{Rabbits:}').scale(0.75).save_state()
+        rabbits = MathTex(r'\text{Rabbits:}', font_size=FONT_SIZE_GENERAL).save_state()
         rabbits_eq = MathTex(*division('dx', 'dt'), '=', r'\alpha x', '-', r'\beta xy')
-        foxes = MathTex('Foxes:').scale(0.75).save_state()
+        foxes = MathTex('Foxes:', font_size=FONT_SIZE_GENERAL).save_state()
         foxes_eq = MathTex(*division('dy', 'dt'), '=', r'\gamma xy', '-', r'\delta y')
 
         pp_conds = [['x', 'y', 't', division('dx', 'dt'), division('dy', 'dt'), r'\alpha', r'\beta', r'\gamma', r'\delta'],
@@ -307,16 +308,19 @@ class CreateHD(Scene):
                      r'\text{--- maximum growth rate of rabbits}', r'\text{--- effect of foxes on the growth rate of rabbits}', r'\text{--- effect of rabbits on the growth rate of foxes}', r'\text{--- death rate of foxes}']]
         
         pp_conds_mtex = []
-        pp_conds_mtex.append((MathTex(pp_conds[0][0]).scale(0.75).move_to([1, 3, 0]),
-                              MathTex(pp_conds[1][0]).scale(0.75).move_to([2, 3, 0])))
+        pp_conds_mtex.append((MathTex(pp_conds[0][0], font_size=FONT_SIZE_PREDATOR_PREY).move_to([0, 3, 0]),
+                              MathTex(pp_conds[1][0], font_size=FONT_SIZE_PREDATOR_PREY)))
+        pp_conds_mtex[0][1].next_to(pp_conds_mtex[0][0], RIGHT)
 
-        for i, _ in enumerate(pp_conds[0][1:]):
+        for i, _ in enumerate(pp_conds[0][1:], 1):
             if isinstance(pp_conds[0][i], list):
-                pp_conds_mtex.append((MathTex(*pp_conds[0][i]).scale(0.75).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
-                                      MathTex(pp_conds[1][i]).scale(0.75).align_to(pp_conds_mtex[i-1][1], LEFT).next_to(pp_conds_mtex[i-1][1], DOWN)))
+                pp_conds_mtex.append((MathTex(*pp_conds[0][i], font_size=FONT_SIZE_PREDATOR_PREY).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
+                                      MathTex(pp_conds[1][i], font_size=FONT_SIZE_PREDATOR_PREY)))
+                pp_conds_mtex[i][1].next_to(pp_conds_mtex[i][0], RIGHT)
             else:
-                pp_conds_mtex.append((MathTex(pp_conds[0][i]).scale(0.75).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
-                                      MathTex(pp_conds[1][i]).scale(0.75).align_to(pp_conds_mtex[i-1][1], LEFT).next_to(pp_conds_mtex[i-1][1], DOWN)))
+                pp_conds_mtex.append((MathTex(pp_conds[0][i], font_size=FONT_SIZE_PREDATOR_PREY).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
+                                      MathTex(pp_conds[1][i], font_size=FONT_SIZE_PREDATOR_PREY)))
+                pp_conds_mtex[i][1].next_to(pp_conds_mtex[i][0], RIGHT)
 
 
         value.next_to(table_2.frame, DOWN).align_to(table_2.frame, LEFT)
@@ -327,7 +331,6 @@ class CreateHD(Scene):
         hawks_desc.next_to(hawks, RIGHT)
         doves.next_to(hawks, DOWN)
         doves_desc.next_to(doves)
-
         
         self.play(FadeIn(table_2.frame))
 
@@ -360,11 +363,10 @@ class CreateHD(Scene):
                 calc_eqs[i].next_to(calc_eqs[i-1], DOWN)
                 self.play(TransformMatchingTex(calc_eqs[i-1].copy(), calc_eqs[i]))
                  # self.play(TransformMatchingShapes(*calc_eqs[i:i+2]))
-
         
         self.play(FadeOut(VGroup(*calc_eqs, ext_table)))
         
-        for i, _ in enumerate(pp_conds_mtex):
-            self.play([AnimationGroup(textos, textos2) for textos, textos2 in pp_conds_mtex[i])
+        for textos, textos2 in pp_conds_mtex:
+            self.play(Write(VGroup(textos, textos2)))
         
         self.wait(PAUSE)
