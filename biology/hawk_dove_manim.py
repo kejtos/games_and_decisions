@@ -25,6 +25,10 @@ TABLE_WIDTH = 10.0
 TABLE_HEIGHT = 5.0
 FONT_SIZE_PREDATOR_PREY = 26
 FONT_SIZE_GENERAL = 36
+MAIN_COLOR = BLUE_D
+
+
+
 def division(n, d):
     return ['{', n, r'\over', d, '}']
 
@@ -38,6 +42,9 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
                  table_height: float = TABLE_HEIGHT,
                  n_rows: int = 2,
                  n_cols: int = 2,
+                 header_col: Optional[str] = WHITE,
+                 payoff_col: Optional[str] = WHITE,
+                 border_col: Optional[str] = WHITE,
                  **kwargs):
         super().__init__(**kwargs)
 
@@ -48,8 +55,11 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
         self.table_height = table_height
         self.n_rows = n_rows
         self.n_cols = n_cols
+        self.text_col = payoff_col
+        self.border_col = border_col
+        self.header_col = header_col
 
-        self.rows = [VGroup(*[Rectangle(width=table_width/(n_rows+1), height=table_height/(n_cols+1)) for cell in range(n_cols)]).arrange(buff = 0.0)]
+        self.rows = [VGroup(*[Rectangle(width=table_width/(n_rows+1), height=table_height/(n_cols+1), color=self.border_col) for _ in range(n_cols)]).arrange(buff = 0.0)]
 
         for i in range(n_rows-1):
             self.rows.append(self.rows[0].copy().next_to(self.rows[0+i], DOWN, buff=0.0))
@@ -104,13 +114,13 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
                     payoff_space = (self.rigth_coos[i][j]-self.left_coos[i][j])/(self.n_payoffs+1)
                     for k, payoff in enumerate(input_payoffs, 1):
                         if isinstance(payoff, str):
-                            payoff = Text(payoff)
+                            payoff = Text(payoff, color=self.text_col)
                         payoffs.append(payoff.move_to(self.left_coos[i][j] + k*payoff_space))
                 else:
                     self.n_payoffs = 1
                     payoff_space = (self.rigth_coos[i][j]-self.left_coos[i][j])/(self.n_payoffs+1)
                     if isinstance(input_payoffs, str):
-                        payoff = Text(payoff)
+                        payoff = Text(payoff, color=self.text_col)
                     payoffs.append(input_payoffs.move_to(self.left_coos[i][j] + payoff_space))
                 row_payoffs.append(payoffs)
             self.all_payoffs.append(row_payoffs)
@@ -125,8 +135,8 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
 
 
     def _set_header_texts(self):
-        self.row_headers_texts = [Text(header).move_to(self.header_coos[0][i]) for i, header in enumerate(self.row_headers)]
-        self.col_headers_texts = [Text(header).move_to(self.header_coos[1][i]) for i, header in enumerate(self.col_headers)]
+        self.row_headers_texts = [Text(header, color=self.header_col).move_to(self.header_coos[0][i]) for i, header in enumerate(self.row_headers)]
+        self.col_headers_texts = [Text(header, color=self.header_col).move_to(self.header_coos[1][i]) for i, header in enumerate(self.col_headers)]
 
 
     def _update_coos(self):
@@ -244,7 +254,10 @@ class CreateHD(Scene):
                           table_width = TABLE_WIDTH,
                           table_height = TABLE_HEIGHT,
                           n_rows = 2,
-                          n_cols = 2).shift(UP)
+                          n_cols = 2,
+                          payoff_col = WHITE,
+                          header_col = WHITE,
+                          border_col = BLUE_D).shift(UP)
 
         payoffs = table_1.get_payoffs()
         row_headers = table_1.get_row_headers()
@@ -252,7 +265,7 @@ class CreateHD(Scene):
         recall_prisoners_dilemma = Text('Let\'s recall prisoner\'s dilemma.')
         cooperation_and_altruism = Text('Cooperation and altruism').to_edge(UL)
 
-        text_below_table = Text('Once again, Prisoner\'s dilemma is \"a reason why we can\'t have nice things.\"', font_size=28).next_to(table_1.frame.get_bottom(), DOWN).shift(DOWN)
+        text_below_table = Text('Once again, Prisoner\'s dilemma is \"a reason why we can\'t have nice things.\"', font_size=28, color=WHITE).next_to(table_1.frame.get_bottom(), DOWN).shift(DOWN)
 
         self.play(Write(recall_prisoners_dilemma))
         self.play(FadeOut(recall_prisoners_dilemma))
@@ -266,9 +279,11 @@ class CreateHD(Scene):
         self.play(FadeIn(VGroup(*payoffs[1][0])))
         self.play(FadeIn(VGroup(*payoffs[1][1])))
 
-        self.play(Indicate(VGroup(payoffs[0][0][0], payoffs[0][1][0])))
-        self.play(Indicate(VGroup(payoffs[0][0][1], payoffs[1][0][1])))
-        self.play(Indicate(VGroup(payoffs[0][0][0], payoffs[0][0][1])))
+        nash_rects = [SurroundingRectangle(payoffs[0][0][0], color=TEAL_E), SurroundingRectangle(payoffs[0][1][0], color=TEAL_E), SurroundingRectangle(payoffs[0][0][1], color=GOLD_E),
+                      SurroundingRectangle(payoffs[1][0][1], color=GOLD_E), SurroundingRectangle(VGroup(payoffs[0][0][0], payoffs[0][0][1]), color=MAROON_E, buff=0.2)]
+
+        for rect in nash_rects:
+            self.play(Write(rect))
 
         self.play(Write(text_below_table))
         self.play(FadeOut(VGroup(table_1, text_below_table)))
@@ -288,20 +303,20 @@ class CreateHD(Scene):
                     n_rows = 2,
                     n_cols = 2).shift(UP)
 
-        value = MathTex('{{V}}').save_state()
-        cost = MathTex('{{C}}').save_state()
-        hawks = MathTex('{{H}}').save_state()
-        doves = MathTex('{{D}}').save_state()
-        value_desc = MathTex(r'\text{--- Value or payoff}', font_size=FONT_SIZE_GENERAL).save_state()
-        cost_desc = MathTex(r'\text{--- Cost}', font_size=FONT_SIZE_GENERAL).save_state()
-        hawks_desc = MathTex(r'\text{--- The proportion of hawks}', font_size=FONT_SIZE_GENERAL).save_state()
-        doves_desc = MathTex(r'\text{--- The proportion of doves}', font_size=FONT_SIZE_GENERAL).save_state()
-        one_minus_hawks = MathTex('1 - H', font_size=FONT_SIZE_GENERAL).save_state()
-        
-        rabbits = MathTex(r'\text{Rabbits:}', font_size=FONT_SIZE_GENERAL).save_state()
-        rabbits_eq = MathTex(*division('dx', 'dt'), '=', r'\alpha x', '-', r'\beta xy')
-        foxes = MathTex('Foxes:', font_size=FONT_SIZE_GENERAL).save_state()
-        foxes_eq = MathTex(*division('dy', 'dt'), '=', r'\gamma xy', '-', r'\delta y')
+        value = MathTex('{{V}}')
+        cost = MathTex('{{C}}')
+        hawks = MathTex('{{H}}')
+        doves = MathTex('{{D}}')
+        value_desc = MathTex(r'\text{--- Value or payoff}', font_size=FONT_SIZE_GENERAL)
+        cost_desc = MathTex(r'\text{--- Cost}', font_size=FONT_SIZE_GENERAL)
+        hawks_desc = MathTex(r'\text{--- The proportion of hawks}', font_size=FONT_SIZE_GENERAL)
+        doves_desc = MathTex(r'\text{--- The proportion of doves}', font_size=FONT_SIZE_GENERAL)
+        one_minus_hawks = MathTex('1 - H', font_size=FONT_SIZE_GENERAL)
+
+        rabbits = MathTex(r'\text{Rabbits:}', font_size=FONT_SIZE_GENERAL).move_to([-5,1,0])
+        rabbits_eq = MathTex(*division('dx', 'dt'), '=', r'\alpha x', '-', r'\beta xy').next_to(rabbits, RIGHT)
+        foxes = MathTex('Foxes:', font_size=FONT_SIZE_GENERAL).next_to(rabbits, DOWN)
+        foxes_eq = MathTex(*division('dy', 'dt'), '=', r'\gamma xy', '-', r'\delta y').next_to(foxes, RIGHT)
 
         pp_conds = [['x', 'y', 't', division('dx', 'dt'), division('dy', 'dt'), r'\alpha', r'\beta', r'\gamma', r'\delta'],
                     [r'\text{--- number of rabbits per square km}', r'\text{--- number of foxes per square km}', r'\text{--- time}', r'\text{--- growth rate of rabbits}', r'\text{--- growth rate of rabbits}',
@@ -310,17 +325,17 @@ class CreateHD(Scene):
         pp_conds_mtex = []
         pp_conds_mtex.append((MathTex(pp_conds[0][0], font_size=FONT_SIZE_PREDATOR_PREY).move_to([0, 3, 0]),
                               MathTex(pp_conds[1][0], font_size=FONT_SIZE_PREDATOR_PREY)))
-        pp_conds_mtex[0][1].next_to(pp_conds_mtex[0][0], RIGHT)
+        pp_conds_mtex[0][1].next_to(pp_conds_mtex[0][0].get_center(), RIGHT)
 
         for i, _ in enumerate(pp_conds[0][1:], 1):
             if isinstance(pp_conds[0][i], list):
                 pp_conds_mtex.append((MathTex(*pp_conds[0][i], font_size=FONT_SIZE_PREDATOR_PREY).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
                                       MathTex(pp_conds[1][i], font_size=FONT_SIZE_PREDATOR_PREY)))
-                pp_conds_mtex[i][1].next_to(pp_conds_mtex[i][0], RIGHT)
+                pp_conds_mtex[i][1].next_to(pp_conds_mtex[i][0].get_center(), RIGHT)
             else:
                 pp_conds_mtex.append((MathTex(pp_conds[0][i], font_size=FONT_SIZE_PREDATOR_PREY).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
                                       MathTex(pp_conds[1][i], font_size=FONT_SIZE_PREDATOR_PREY)))
-                pp_conds_mtex[i][1].next_to(pp_conds_mtex[i][0], RIGHT)
+                pp_conds_mtex[i][1].next_to(pp_conds_mtex[i][0].get_center(), RIGHT)
 
 
         value.next_to(table_2.frame, DOWN).align_to(table_2.frame, LEFT)
@@ -367,6 +382,12 @@ class CreateHD(Scene):
         self.play(FadeOut(VGroup(*calc_eqs, ext_table)))
         
         for textos, textos2 in pp_conds_mtex:
-            self.play(Write(VGroup(textos, textos2)))
+            self.play(Create(VGroup(textos, textos2)))
+
+        self.play(Create(rabbits))
+        self.play(Create(rabbits_eq))
         
+        self.play(Create(foxes))
+        self.play(Create(foxes_eq))
+
         self.wait(PAUSE)
