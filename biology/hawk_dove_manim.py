@@ -7,7 +7,7 @@ from scipy.integrate import odeint
 
 X_MOVE = 5.5
 Y_MOVE = 2
-PAUSE = 0.8
+PAUSE = 1
 OPACITY = 0.5
 DEF_SCALE = 0.75
 N = 2000
@@ -45,6 +45,7 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
                  header_col: Optional[str] = WHITE,
                  payoff_col: Optional[str] = WHITE,
                  border_col: Optional[str] = WHITE,
+                 header_font_size: Optional[str] = 36,
                  **kwargs):
         super().__init__(**kwargs)
 
@@ -58,6 +59,7 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
         self.text_col = payoff_col
         self.border_col = border_col
         self.header_col = header_col
+        self.header_font_size = header_font_size
 
         self.rows = [VGroup(*[Rectangle(width=table_width/(n_rows+1), height=table_height/(n_cols+1), color=self.border_col) for _ in range(n_cols)]).arrange(buff = 0.0)]
 
@@ -135,8 +137,8 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
 
 
     def _set_header_texts(self):
-        self.row_headers_texts = [Text(header, color=self.header_col).move_to(self.header_coos[0][i]) for i, header in enumerate(self.row_headers)]
-        self.col_headers_texts = [Text(header, color=self.header_col).move_to(self.header_coos[1][i]) for i, header in enumerate(self.col_headers)]
+        self.row_headers_texts = [Text(header, color=self.header_col, font_size=self.header_font_size).move_to(self.header_coos[0][i]) for i, header in enumerate(self.row_headers)]
+        self.col_headers_texts = [Text(header, color=self.header_col, font_size=self.header_font_size).move_to(self.header_coos[1][i]) for i, header in enumerate(self.col_headers)]
 
 
     def _update_coos(self):
@@ -207,12 +209,26 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
 
     def get_col_headers(self, col: Optional[int] = None):
         if col is None:
-            return(self.col_headers_texts)
+            return self.col_headers_texts
         else:
-            return(self.col_headers_texts[col])
+            return self.col_headers_texts[col]
 
 
-    def update_header(self, row_col: str, pos: int, new_header: str):
+    def get_row_header_coos(self, pos: Optional[int] = None):
+        if pos is None:
+            return self.header_coos[0]
+        else:
+            return self.header_coos[0][pos]
+
+
+    def get_col_header_coos(self, pos: Optional[int] = None):
+        if pos is None:
+            return self.header_coos[1]
+        else:
+            return self.header_coos[1][pos]
+
+
+    def update_header(self, new_header: str, row_col: str, pos: int): # those are likely wrong due to mathtex not using become. Change it to a custom animation, like custom write.
         if row_col.lower() in ('row', 'rows', 'r'):
             self.row_headers_texts[pos].become(Text(new_header).move_to(self.row_headers_texts[pos]))
             self.row_headers_texts[pos] = Text(new_header).move_to(self.row_headers_texts[pos])
@@ -222,7 +238,7 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
             self.col_headers_texts[pos] = Text(new_header).move_to(self.col_headers_texts[pos])
 
 
-    def update_payoff(self, row: int, col: int, pos: int, new_payoff: str | Mobject):
+    def update_payoff(self, new_payoff: str | Mobject, row: int, col: int, pos: int):
         if isinstance(new_payoff, str):
             new_payoff = Text(new_payoff)
         self.all_payoffs[row][col][pos].become(new_payoff.move_to(self.all_payoffs[row][col][pos]))
@@ -231,6 +247,29 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
 
 class CreateHD(Scene):
     def construct(self):
+        eqs_left = ['EV_H',
+                    r'{{H}} \big( {V \over 2} - { C \over 2 } \big) + DV'
+                    r'{{H}} {{V}} {{- HC}} + DV'
+                    r'{{H}} {{V}} {{- HC}}'
+                    r'{{H}} {{V}} {{- HC}}',
+                    r'{{H}} {{V}} {{- HC}}',
+                    r'{{- HC}}',
+                    r'{{HC}}',
+                    r'H']
+
+        eqs_right = ['EV_D',
+                     r'0 + { {{D}} \over 2 }',
+                     '{{-D}} {{V}}',
+                     '-D {{V}}',
+                     '-(1-H) {{V}}',
+                     'HV-{{V}}',
+                     '-{{V}}',
+                     '{{V}}',
+                     '{V \over C}']
+
+        eqs_eq = ['{{=}}']*len(eqs_left)
+
+
         calcs = [['EV_H = EV_D'],
                  [r'{{H}} \big( {V \over 2} - { C \over 2 } \big) + DV', '{{=}}', r'0 + { {{D}} \over 2 }'],
                  [r'{{H}} {{V}} {{- HC}} + DV', '{{=}}', '{{-D}} {{V}}'],
@@ -240,13 +279,11 @@ class CreateHD(Scene):
                  [r'{{- HC}}', '{{=}}', '-{{V}}'],
                  [r'{{HC}}', '{{=}}', '{{V}}'],
                  [r'H', '{{=}}', '{V \over C}']]
-        
+
         conds = ([r'V > C'],
                  [r'V < C'],
                  [r'H > \frac{V}{C}'],
                  [r'H < \frac{V}{C}'])
-        
-        # headers
 
         table_1 = GTtable(table_strs=[[('1', '1'), ('3', '0')], [('0', '3'), ('2', '2')]],
                           row_headers=['Fight', 'Share'],
@@ -257,7 +294,8 @@ class CreateHD(Scene):
                           n_cols = 2,
                           payoff_col = WHITE,
                           header_col = WHITE,
-                          border_col = BLUE_D).shift(UP)
+                          border_col = BLUE_D,
+                          header_font_size = 30).shift(UP)
 
         payoffs = table_1.get_payoffs()
         row_headers = table_1.get_row_headers()
@@ -274,10 +312,10 @@ class CreateHD(Scene):
         self.play(AnimationGroup(Write(row_headers[0]), Write(row_headers[1])))
         self.play(AnimationGroup(Write(col_headers[0]), Write(col_headers[1])))
         
-        self.play(FadeIn(VGroup(*payoffs[0][0])))
-        self.play(FadeIn(VGroup(*payoffs[0][1])))
-        self.play(FadeIn(VGroup(*payoffs[1][0])))
-        self.play(FadeIn(VGroup(*payoffs[1][1])))
+        self.play(Write(VGroup(*payoffs[0][0])))
+        self.play(Write(VGroup(*payoffs[0][1])))
+        self.play(Write(VGroup(*payoffs[1][0])))
+        self.play(Write(VGroup(*payoffs[1][1])))
 
         nash_rects = [SurroundingRectangle(payoffs[0][0][0], color=TEAL_E), SurroundingRectangle(payoffs[0][1][0], color=TEAL_E), SurroundingRectangle(payoffs[0][0][1], color=GOLD_E),
                       SurroundingRectangle(payoffs[1][0][1], color=GOLD_E), SurroundingRectangle(VGroup(payoffs[0][0][0], payoffs[0][0][1]), color=MAROON_E, buff=0.2)]
@@ -286,7 +324,7 @@ class CreateHD(Scene):
             self.play(Write(rect))
 
         self.play(Write(text_below_table))
-        self.play(FadeOut(VGroup(table_1, text_below_table)))
+        self.play(FadeOut(VGroup(*nash_rects, table_1, text_below_table)))
         self.play(Write(cooperation_and_altruism))
         self.play(FadeOut(cooperation_and_altruism))
 
@@ -301,7 +339,11 @@ class CreateHD(Scene):
                     table_width = TABLE_WIDTH,
                     table_height = TABLE_HEIGHT,
                     n_rows = 2,
-                    n_cols = 2).shift(UP)
+                    n_cols = 2,
+                    payoff_col = WHITE,
+                    header_col = WHITE,
+                    border_col = BLUE_D,
+                    header_font_size = 30).shift(UP)
 
         value = MathTex('{{V}}')
         cost = MathTex('{{C}}')
@@ -309,14 +351,14 @@ class CreateHD(Scene):
         doves = MathTex('{{D}}')
         value_desc = MathTex(r'\text{--- Value or payoff}', font_size=FONT_SIZE_GENERAL)
         cost_desc = MathTex(r'\text{--- Cost}', font_size=FONT_SIZE_GENERAL)
-        hawks_desc = MathTex(r'\text{--- The proportion of hawks}', font_size=FONT_SIZE_GENERAL)
-        doves_desc = MathTex(r'\text{--- The proportion of doves}', font_size=FONT_SIZE_GENERAL)
+        hawks_desc = MathTex(r'\text{--- Proportion of hawks}', font_size=FONT_SIZE_GENERAL)
+        doves_desc = MathTex(r'\text{--- Proportion of doves}', font_size=FONT_SIZE_GENERAL)
         one_minus_hawks = MathTex('1 - H', font_size=FONT_SIZE_GENERAL)
 
-        rabbits = MathTex(r'\text{Rabbits:}', font_size=FONT_SIZE_GENERAL).move_to([-5,1,0])
+        rabbits = Text('Rabbits:', font_size=FONT_SIZE_GENERAL).move_to([-5,2,0])
         rabbits_eq = MathTex(*division('dx', 'dt'), '=', r'\alpha x', '-', r'\beta xy').next_to(rabbits, RIGHT)
-        foxes = MathTex('Foxes:', font_size=FONT_SIZE_GENERAL).next_to(rabbits, DOWN)
-        foxes_eq = MathTex(*division('dy', 'dt'), '=', r'\gamma xy', '-', r'\delta y').next_to(foxes, RIGHT)
+        foxes = Text('Foxes:', font_size=FONT_SIZE_GENERAL).next_to(rabbits, DOWN).shift(DOWN)
+        foxes_eq = MathTex(*division('dy', 'dt'), '=', r'\gamma xy', '-', r'\delta y').align_to(rabbits_eq, LEFT).next_to(rabbits_eq, DOWN)
 
         pp_conds = [['x', 'y', 't', division('dx', 'dt'), division('dy', 'dt'), r'\alpha', r'\beta', r'\gamma', r'\delta'],
                     [r'\text{--- number of rabbits per square km}', r'\text{--- number of foxes per square km}', r'\text{--- time}', r'\text{--- growth rate of rabbits}', r'\text{--- growth rate of rabbits}',
@@ -346,7 +388,8 @@ class CreateHD(Scene):
         hawks_desc.next_to(hawks, RIGHT)
         doves.next_to(hawks, DOWN)
         doves_desc.next_to(doves)
-        
+        ext_table = VGroup(table_2, value_desc, value, cost, cost_desc, hawks, hawks_desc, doves, doves_desc)
+
         self.play(FadeIn(table_2.frame))
 
         self.play(Write(table_2.get_row_headers(0)))
@@ -364,31 +407,29 @@ class CreateHD(Scene):
         self.play(Create(table_2.get_payoffs(1,0,0)))
         self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(1,1,0)))
 
-        ext_table = VGroup(table_2, value_desc, value, cost, cost_desc, hawks, hawks_desc, doves, doves_desc)
-
         self.play(ext_table.animate.scale(0.5).to_edge(UR))
 
-        calc_eqs = []
-        for i, calc in enumerate(calcs):
-            # self.wait()
-            calc_eqs.append(MathTex(*calc).scale(DEF_SCALE).move_to([-4,3,0]))
-            if i == 0:
-                self.play(Create(*calc_eqs[i]))
-            else:
-                calc_eqs[i].next_to(calc_eqs[i-1], DOWN)
-                self.play(TransformMatchingTex(calc_eqs[i-1].copy(), calc_eqs[i]))
-                 # self.play(TransformMatchingShapes(*calc_eqs[i:i+2]))
+        calc_eqs = [(left, eq, right)]
+        self.play(AnimationGroup(Write(left), Write(eq), Write(right)))
         
+        for i, left, eq, right in enumerate(zip(eqs_left[1:], eqs_eq, eqs_right), 1):
+            # self.wait()
+            calc_eqs[i].next_to(calc_eqs[i-1], DOWN)
+            self.play(AnimationGroup(TransformMatchingTex(left), Write(eq), Write(right)))
+
+            TransformMatchingTex(calc_eqs[i-1].copy(), calc_eqs[i])
+                # self.play(TransformMatchingShapes(*calc_eqs[i:i+2]))
+    
         self.play(FadeOut(VGroup(*calc_eqs, ext_table)))
         
         for textos, textos2 in pp_conds_mtex:
             self.play(Create(VGroup(textos, textos2)))
 
-        self.play(Create(rabbits))
-        self.play(Create(rabbits_eq))
+        self.play(FadeIn(rabbits))
+        self.play(FadeIn(rabbits_eq))
         
-        self.play(Create(foxes))
-        self.play(Create(foxes_eq))
+        self.play(FadeIn(foxes))
+        self.play(FadeIn(foxes_eq))
 
         self.wait(PAUSE)
- 
+
