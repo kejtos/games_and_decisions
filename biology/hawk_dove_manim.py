@@ -391,3 +391,4 @@ class CreateHD(Scene):
         self.play(Create(foxes_eq))
 
         self.wait(PAUSE)
+ 
