@@ -24,6 +24,7 @@ DEF_COL = BLUE_D
 TABLE_WIDTH = 10.0
 TABLE_HEIGHT = 5.0
 FONT_SIZE_PREDATOR_PREY = 26
+FONT_SIZE_HAWK_DOVE = 30
 FONT_SIZE_GENERAL = 36
 MAIN_COLOR = BLUE_D
 
@@ -247,38 +248,16 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
 
 class CreateHD(Scene):
     def construct(self):
-        eqs_left = ['EV_H',
-                    r'{{H}} \big( {V \over 2} - { C \over 2 } \big) + DV'
-                    r'{{H}} {{V}} {{- HC}} + DV'
-                    r'{{H}} {{V}} {{- HC}}'
-                    r'{{H}} {{V}} {{- HC}}',
-                    r'{{H}} {{V}} {{- HC}}',
-                    r'{{- HC}}',
-                    r'{{HC}}',
-                    r'H']
-
-        eqs_right = ['EV_D',
-                     r'0 + { {{D}} \over 2 }',
-                     '{{-D}} {{V}}',
-                     '-D {{V}}',
-                     '-(1-H) {{V}}',
-                     'HV-{{V}}',
-                     '-{{V}}',
-                     '{{V}}',
-                     '{V \over C}']
-
-        eqs_eq = ['{{=}}']*len(eqs_left)
-
-
-        calcs = [['EV_H = EV_D'],
-                 [r'{{H}} \big( {V \over 2} - { C \over 2 } \big) + DV', '{{=}}', r'0 + { {{D}} \over 2 }'],
-                 [r'{{H}} {{V}} {{- HC}} + DV', '{{=}}', '{{-D}} {{V}}'],
-                 [r'{{H}} {{V}} {{- HC}}', '{{=}}', '-D {{V}}'],
-                 [r'{{H}} {{V}} {{- HC}}', '{{=}}', '-(1-H) {{V}}'],
-                 [r'{{H}} {{V}} {{- HC}}', '{{=}}', 'HV-{{V}}'],
-                 [r'{{- HC}}', '{{=}}', '-{{V}}'],
-                 [r'{{HC}}', '{{=}}', '{{V}}'],
-                 [r'H', '{{=}}', '{V \over C}']]
+        eqs = MathTex(r'EV_H &= EV_D\\',
+                      r'H \big( {V \over 2} - { C \over 2 } \big) + DV &= 0 + D { V \over 2 }\\',
+                      r'HV - HC + 2DV &= DV\\',
+                      r'HV - HC &= -DV\\',
+                      r'HV - HC &= -(1-H)V\\',
+                      r'HV - HC &= HV - V\\',
+                      r'-HC &= -V\\',
+                      r'HC &= V\\',
+                      r'H &= {V \over C}\\',
+                      font_size=FONT_SIZE_HAWK_DOVE).to_edge(UL)
 
         conds = ([r'V > C'],
                  [r'V < C'],
@@ -363,7 +342,7 @@ class CreateHD(Scene):
         pp_conds = [['x', 'y', 't', division('dx', 'dt'), division('dy', 'dt'), r'\alpha', r'\beta', r'\gamma', r'\delta'],
                     [r'\text{--- number of rabbits per square km}', r'\text{--- number of foxes per square km}', r'\text{--- time}', r'\text{--- growth rate of rabbits}', r'\text{--- growth rate of rabbits}',
                      r'\text{--- maximum growth rate of rabbits}', r'\text{--- effect of foxes on the growth rate of rabbits}', r'\text{--- effect of rabbits on the growth rate of foxes}', r'\text{--- death rate of foxes}']]
-        
+
         pp_conds_mtex = []
         pp_conds_mtex.append((MathTex(pp_conds[0][0], font_size=FONT_SIZE_PREDATOR_PREY).move_to([0, 3, 0]),
                               MathTex(pp_conds[1][0], font_size=FONT_SIZE_PREDATOR_PREY)))
@@ -408,19 +387,18 @@ class CreateHD(Scene):
         self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(1,1,0)))
 
         self.play(ext_table.animate.scale(0.5).to_edge(UR))
-
-        calc_eqs = [(left, eq, right)]
-        self.play(AnimationGroup(Write(left), Write(eq), Write(right)))
         
-        for i, left, eq, right in enumerate(zip(eqs_left[1:], eqs_eq, eqs_right), 1):
-            # self.wait()
-            calc_eqs[i].next_to(calc_eqs[i-1], DOWN)
-            self.play(AnimationGroup(TransformMatchingTex(left), Write(eq), Write(right)))
+        self.play(Write(eqs[0]))
+        self.wait()
 
-            TransformMatchingTex(calc_eqs[i-1].copy(), calc_eqs[i])
-                # self.play(TransformMatchingShapes(*calc_eqs[i:i+2]))
+        self.play(Write(eqs[1]))
+        self.wait()
+
+        for i in range(1, len(eqs)-1):
+            self.wait()
+            self.play(ReplacementTransform(eqs[i].copy(), eqs[i+1]))
     
-        self.play(FadeOut(VGroup(*calc_eqs, ext_table)))
+        self.play(FadeOut(VGroup(eqs, ext_table)))
         
         for textos, textos2 in pp_conds_mtex:
             self.play(Create(VGroup(textos, textos2)))
@@ -433,3 +411,139 @@ class CreateHD(Scene):
 
         self.wait(PAUSE)
 
+
+class test(Scene):
+    def construct(self):
+        eqs_left = [['EV_H'],
+                    ['{{H}}', '\\big(', '{', '{{V}}', '\\over', '2', '}', '-', '{', '{{C}}', '\\over', '2', '}', '\\big)', '+', 'DV'],
+                    ['{{H}}', '{{V}}', '{{-}}', '{{H}}', '{{C}}', '+', 'D', '{{V}}'],
+                    '{{H}} {{V}} {{-}} {{H}} {{C}}',
+                    '{{H}} {{V}} {{-}} {{H}} {{C}}',
+                    '{{H}} {{V}} {{-}} {{H}} {{C}}',
+                    '{{- H}} {{C}}', '{{=}}', '-{{V}}',
+                    '{{H}} {{C}}',
+                    '{{H}}']
+
+        eqs_right = [['EV_D'],
+                     ['0', '+', '{', '{{D}}', '\over', '2', '}'],
+                     ['{{-}}', '{{D}}', '{{V}}'],
+                     '{{-}} {{D}} {{V}}',
+                     '{{-}} (1 {{-}} {{H}}) {{V}}',
+                     '{{H}} {{V}} {{-}} {{V}}',
+                     '{{-}} {{V}}',
+                     '{{V}}',
+                     '{ {{V}} \\over {{C}} }']
+
+        eqs_eq = ['{{=}}']*len(eqs_left)
+
+        conds = ([r'V > C'],
+                 [r'V < C'],
+                 [r'H > \frac{V}{C}'],
+                 [r'H < \frac{V}{C}'])
+        
+        eq_start = MathTex(eqs_eq[0], font_size=FONT_SIZE_HAWK_DOVE).move_to([-2,3,0])
+        left_start = MathTex(*eqs_left[0], font_size=FONT_SIZE_HAWK_DOVE).next_to(eq_start, LEFT)
+        right_start = MathTex(*eqs_right[0], font_size=FONT_SIZE_HAWK_DOVE).next_to(eq_start, RIGHT)
+        self.play(Write(VGroup(left_start, eq_start, right_start)))
+        calc_eqs = [(left_start, eq_start, right_start)]
+
+        prev_left, prev_eq, prev_right = calc_eqs[0]
+        eq = MathTex(eqs_eq[1], font_size=FONT_SIZE_HAWK_DOVE).next_to(prev_eq, DOWN).shift(0.5*DOWN)
+        left = MathTex(*eqs_left[1], font_size=FONT_SIZE_HAWK_DOVE).next_to(eq, LEFT)
+        right = MathTex(*eqs_right[1], font_size=FONT_SIZE_HAWK_DOVE).next_to(eq, RIGHT)
+        self.play(Write(VGroup(left, eq, right)))
+        calc_eqs.append((left, eq, right))
+        
+        for i, (left, eq, right) in enumerate(zip(eqs_left[2:3], eqs_eq[2:3], eqs_right[2:3]), 2):
+            prev_left, prev_eq, prev_right = calc_eqs[i-1]
+            eq = MathTex(eq, font_size=FONT_SIZE_HAWK_DOVE).next_to(prev_eq, DOWN).shift(0.5*DOWN)
+            left = MathTex(*left, font_size=FONT_SIZE_HAWK_DOVE).next_to(eq, LEFT)
+            right = MathTex(*right, font_size=FONT_SIZE_HAWK_DOVE).next_to(eq, RIGHT)
+            calc_eqs.append((left, eq, right))
+            self.play(TransformMatchingTex(prev_left.copy(), left), TransformMatchingTex(prev_eq.copy(), eq), TransformMatchingTex(prev_right.copy(), right))
+
+
+class Main(Scene):
+    def construct(self):
+
+        first_dummy = MathTex(r'H \big( \frac{V}{2} - \frac{C}{2} \big) + DV &= 0 + D \frac{V}{2}\\')
+        eqs = MathTex(r'EV_H &= EV_D\\',
+                      r'H \big( \frac{V}{2} - \frac{C}{2} \big) + DV &= 0 + D { \frac{V}{2} }} }\\',
+                      r'HV - HC + 2DV &= DV\\',
+                      r'HV - HC &= -DV\\',
+                      r'HV - HC &= -(1-H)V\\',
+                      r'HV - HC &= HV - V\\',
+                      r'-HC &= -V\\',
+                      r'HC &= V\\',
+                      r'H &= {V \over C}\\',
+                      font_size=FONT_SIZE_HAWK_DOVE).to_edge(UL)
+        first_dummy[0]
+        hawk_fight_dummy = MathTex(r'{{ \frac{V}{2} - \frac{C}{2} }}')#.move_to(hawk_fight)
+        self.play(TransformMatchingTex(hawk_fight_dummy, eqs[1]))
+        self.wait()
+
+        # hawk_fight = MathTex('{', *division('{{V}}', '2'), '-', *division('{{C}}', '2'), '}')
+        # hawk_share = MathTex('{{V}}')
+        # dove_fight = MathTex('0')
+        # dove_share = MathTex(*division('{{V}}', '2'))
+
+        # table_2 = GTtable(table_strs=[[hawk_fight, hawk_share], [dove_fight, dove_share]],
+        #             row_headers=['Hawk meets', 'Dove meets'],
+        #             col_headers=['Hawk', 'Dove'],
+        #             table_width = TABLE_WIDTH,
+        #             table_height = TABLE_HEIGHT,
+        #             n_rows = 2,
+        #             n_cols = 2,
+        #             payoff_col = WHITE,
+        #             header_col = WHITE,
+        #             border_col = BLUE_D,
+        #             header_font_size = 30).shift(UP)
+        
+
+        # value = MathTex('{{V}}')
+        # cost = MathTex('{{C}}')
+        # hawks = MathTex('{{H}}')
+        # doves = MathTex('{{D}}')
+        # value_desc = MathTex(r'\text{--- Value or payoff}', font_size=FONT_SIZE_GENERAL)
+        # cost_desc = MathTex(r'\text{--- Cost}', font_size=FONT_SIZE_GENERAL)
+        # hawks_desc = MathTex(r'\text{--- Proportion of hawks}', font_size=FONT_SIZE_GENERAL)
+        # doves_desc = MathTex(r'\text{--- Proportion of doves}', font_size=FONT_SIZE_GENERAL)
+        # one_minus_hawks = MathTex('1 - H', font_size=FONT_SIZE_GENERAL)
+
+        # value.next_to(table_2.frame, DOWN).align_to(table_2.frame, LEFT)
+        # value_desc.next_to(value, RIGHT)
+        # cost.next_to(value, DOWN)
+        # cost_desc.next_to(cost, RIGHT)
+        # hawks.next_to(value_desc, buff=1)
+        # hawks_desc.next_to(hawks, RIGHT)
+        # doves.next_to(hawks, DOWN)
+        # doves_desc.next_to(doves)
+        # ext_table = VGroup(table_2, value_desc, value, cost, cost_desc, hawks, hawks_desc, doves, doves_desc)
+
+        # self.play(FadeIn(table_2.frame))
+
+        # self.play(Write(table_2.get_row_headers(0)))
+        # self.play(Write(table_2.get_row_headers(1)))
+        # self.play(Write(table_2.get_col_headers(0)))
+        # self.play(Write(table_2.get_col_headers(1)))
+
+        # self.play(Write(VGroup(value, value_desc)))
+        # self.play(Write(VGroup(cost, cost_desc)))
+        # self.play(Write(VGroup(hawks, hawks_desc)))
+        # self.play(Write(VGroup(doves, doves_desc)))
+
+        # self.play(TransformMatchingTex(VGroup(value.copy(), cost.copy()), table_2.get_payoffs(0,0,0)))
+        # self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(0,1,0)))
+        # self.play(Create(table_2.get_payoffs(1,0,0)))
+        # self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(1,1,0)))
+
+        # self.play(ext_table.animate.scale(0.5).to_edge(UR))
+
+
+        # self.play(Write(eqs[0]))
+        # self.wait()
+
+
+        # for i in range(1, len(eqs)-1):
+        #     self.wait()
+        #     self.play(ReplacementTransform(eqs[i].copy(), eqs[i+1]))
