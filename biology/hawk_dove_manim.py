@@ -466,9 +466,8 @@ class test(Scene):
 class Main(Scene):
     def construct(self):
 
-        first_dummy = MathTex(r'H \big( \frac{V}{2} - \frac{C}{2} \big) + DV &= 0 + D \frac{V}{2}\\')
         eqs = MathTex(r'EV_H &= EV_D\\',
-                      r'H \big( \frac{V}{2} - \frac{C}{2} \big) + DV &= 0 + D { \frac{V}{2} }} }\\',
+                      r'H \big( {V \over 2} - {C \over 2} \big) + DV &= 0 + D {V \over 2}\\',
                       r'HV - HC + 2DV &= DV\\',
                       r'HV - HC &= -DV\\',
                       r'HV - HC &= -(1-H)V\\',
@@ -477,73 +476,125 @@ class Main(Scene):
                       r'HC &= V\\',
                       r'H &= {V \over C}\\',
                       font_size=FONT_SIZE_HAWK_DOVE).to_edge(UL)
-        first_dummy[0]
-        hawk_fight_dummy = MathTex(r'{{ \frac{V}{2} - \frac{C}{2} }}')#.move_to(hawk_fight)
-        self.play(TransformMatchingTex(hawk_fight_dummy, eqs[1]))
-        self.wait()
 
-        # hawk_fight = MathTex('{', *division('{{V}}', '2'), '-', *division('{{C}}', '2'), '}')
-        # hawk_share = MathTex('{{V}}')
-        # dove_fight = MathTex('0')
-        # dove_share = MathTex(*division('{{V}}', '2'))
 
-        # table_2 = GTtable(table_strs=[[hawk_fight, hawk_share], [dove_fight, dove_share]],
-        #             row_headers=['Hawk meets', 'Dove meets'],
-        #             col_headers=['Hawk', 'Dove'],
-        #             table_width = TABLE_WIDTH,
-        #             table_height = TABLE_HEIGHT,
-        #             n_rows = 2,
-        #             n_cols = 2,
-        #             payoff_col = WHITE,
-        #             header_col = WHITE,
-        #             border_col = BLUE_D,
-        #             header_font_size = 30).shift(UP)
+        hawk_fight = MathTex('{', *division('{{V}}', '2'), '-', *division('{{C}}', '2'), '}')
+        hawk_share = MathTex('{{V}}')
+        dove_fight = MathTex('0')
+        dove_share = MathTex(*division('{{V}}', '2'))
+
+        table_2 = GTtable(table_strs=[[hawk_fight, hawk_share], [dove_fight, dove_share]],
+                    row_headers=['Hawk meets', 'Dove meets'],
+                    col_headers=['Hawk', 'Dove'],
+                    table_width = TABLE_WIDTH,
+                    table_height = TABLE_HEIGHT,
+                    n_rows = 2,
+                    n_cols = 2,
+                    payoff_col = WHITE,
+                    header_col = WHITE,
+                    border_col = BLUE_D,
+                    header_font_size = 30).shift(UP)
         
 
-        # value = MathTex('{{V}}')
-        # cost = MathTex('{{C}}')
-        # hawks = MathTex('{{H}}')
-        # doves = MathTex('{{D}}')
-        # value_desc = MathTex(r'\text{--- Value or payoff}', font_size=FONT_SIZE_GENERAL)
-        # cost_desc = MathTex(r'\text{--- Cost}', font_size=FONT_SIZE_GENERAL)
-        # hawks_desc = MathTex(r'\text{--- Proportion of hawks}', font_size=FONT_SIZE_GENERAL)
-        # doves_desc = MathTex(r'\text{--- Proportion of doves}', font_size=FONT_SIZE_GENERAL)
-        # one_minus_hawks = MathTex('1 - H', font_size=FONT_SIZE_GENERAL)
+        value = MathTex('{{V}}')
+        cost = MathTex('{{C}}')
+        hawks = MathTex('{{H}}')
+        doves = MathTex('{{D}}')
+        value_desc = MathTex(r'\text{--- Value or payoff}', font_size=FONT_SIZE_GENERAL)
+        cost_desc = MathTex(r'\text{--- Cost}', font_size=FONT_SIZE_GENERAL)
+        hawks_desc = MathTex(r'\text{--- Proportion of hawks}', font_size=FONT_SIZE_GENERAL)
+        doves_desc = MathTex(r'\text{--- Proportion of doves}', font_size=FONT_SIZE_GENERAL)
+        one_minus_hawks = MathTex('1 - H', font_size=FONT_SIZE_GENERAL)
 
-        # value.next_to(table_2.frame, DOWN).align_to(table_2.frame, LEFT)
-        # value_desc.next_to(value, RIGHT)
-        # cost.next_to(value, DOWN)
-        # cost_desc.next_to(cost, RIGHT)
-        # hawks.next_to(value_desc, buff=1)
-        # hawks_desc.next_to(hawks, RIGHT)
-        # doves.next_to(hawks, DOWN)
-        # doves_desc.next_to(doves)
-        # ext_table = VGroup(table_2, value_desc, value, cost, cost_desc, hawks, hawks_desc, doves, doves_desc)
+        value.next_to(table_2.frame, DOWN).align_to(table_2.frame, LEFT)
+        value_desc.next_to(value, RIGHT)
+        cost.next_to(value, DOWN)
+        cost_desc.next_to(cost, RIGHT)
+        hawks.next_to(value_desc, buff=1)
+        hawks_desc.next_to(hawks, RIGHT)
+        doves.next_to(hawks, DOWN)
+        doves_desc.next_to(doves)
+        ext_table = VGroup(table_2, value_desc, value, cost, cost_desc, hawks, hawks_desc, doves, doves_desc)
 
-        # self.play(FadeIn(table_2.frame))
+        self.play(FadeIn(table_2.frame))
 
-        # self.play(Write(table_2.get_row_headers(0)))
-        # self.play(Write(table_2.get_row_headers(1)))
-        # self.play(Write(table_2.get_col_headers(0)))
-        # self.play(Write(table_2.get_col_headers(1)))
+        self.play(Write(table_2.get_row_headers(0)))
+        self.play(Write(table_2.get_row_headers(1)))
+        self.play(Write(table_2.get_col_headers(0)))
+        self.play(Write(table_2.get_col_headers(1)))
 
-        # self.play(Write(VGroup(value, value_desc)))
-        # self.play(Write(VGroup(cost, cost_desc)))
-        # self.play(Write(VGroup(hawks, hawks_desc)))
-        # self.play(Write(VGroup(doves, doves_desc)))
+        self.play(Write(VGroup(value, value_desc)))
+        self.play(Write(VGroup(cost, cost_desc)))
+        self.play(Write(VGroup(hawks, hawks_desc)))
+        self.play(Write(VGroup(doves, doves_desc)))
 
-        # self.play(TransformMatchingTex(VGroup(value.copy(), cost.copy()), table_2.get_payoffs(0,0,0)))
-        # self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(0,1,0)))
-        # self.play(Create(table_2.get_payoffs(1,0,0)))
-        # self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(1,1,0)))
+        self.play(TransformMatchingTex(VGroup(value.copy(), cost.copy()), table_2.get_payoffs(0,0,0)))
+        self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(0,1,0)))
+        self.play(Create(table_2.get_payoffs(1,0,0)))
+        self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(1,1,0)))
 
-        # self.play(ext_table.animate.scale(0.5).to_edge(UR))
+        self.play(ext_table.animate.scale(0.5).to_edge(UR))
+
+        for eq in eqs:
+            index_labels(eq)
+        index_labels(hawks)
+        index_labels(doves)
+        index_labels(table_2.get_payoffs(0,0,0))
+        index_labels(table_2.get_payoffs(0,1,0))
+        index_labels(table_2.get_payoffs(1,0,0))
+        index_labels(table_2.get_payoffs(1,1,0))
+
+# 1st eq
+        self.play(Write(eqs[0]))
+
+# 2nd eq
+        self.play(FadeIn(eqs[1][13]))
+        self.play(hawks[0].copy().animate.scale(2).move_to(eqs[1][0]))
+        self.play(FadeIn(eqs[1][1]), FadeIn(eqs[1][9]), table_2.get_payoffs(0,0,0).copy().animate.scale(2).move_to(eqs[1][2:9]))
+        self.play(FadeIn(eqs[1][10]))
+        self.play(doves.copy().scale(2).animate.move_to(eqs[1][11]))
+        self.play(table_2.get_payoffs(0,1,0).copy().animate.scale(1).move_to(eqs[1][12]))
+        self.play(FadeIn(eqs[1][13]))
+        self.play(table_2.get_payoffs(1,0,0).copy().animate.scale(1).move_to(eqs[1][14]))
+        self.play(FadeIn(eqs[1][15]))
+        self.play(doves.copy().animate.scale(2).move_to(eqs[1][16]))
+        self.play(table_2.get_payoffs(1,1,0).copy().animate.scale(1).move_to(eqs[1][17:20]))
+
+# 3rd eq
+        self.play(eqs[1][0].copy().animate.move_to(eqs[2][0]),
+                  eqs[1][2].copy().animate.move_to(eqs[2][1]),
+                  eqs[1][5].copy().animate.move_to(eqs[2][2]),
+                  eqs[1][0].copy().animate.move_to(eqs[2][3]),
+                  eqs[1][6].copy().animate.move_to(eqs[2][4]))
+
+        self.play(eqs[1][10].copy().animate.move_to(eqs[2][5]),
+                  FadeIn(eqs[2][6]),
+                  eqs[1][11].copy().animate.move_to(eqs[2][7]),
+                  eqs[1][12].copy().animate.move_to(eqs[2][8]))
+        self.play(FadeIn(eqs[2][9]))
+        
+        self.play(eqs[1][16].copy().animate.move_to(eqs[2][10]),
+                  eqs[1][17].copy().animate.move_to(eqs[2][11]))
+
+# 4th eq
+        self.play(eqs[2][0:5].animate.move_to(eqs[3][0:5]))
+        self.play(FadeIn(eqs[3][5]))
+        self.play(FadeIn(eqs[3][6]), eqs[2][10:12].animate.move_to(eqs[3][7:9]))
+# 5th eq
+        self.play(eqs[3][0:5].animate.move_to(eqs[4][0:5]))
+        self.play(FadeIn(eqs[4][5]))
+        self.play(eqs[3][6].copy().animate.move_to(eqs[4][6]))
+        self.play(FadeIn(eqs[4][7]), FadeIn(eqs[4][11]), Transform(eqs[3][7].copy(), eqs[4][8:11]))
+        self.play(eqs[3][8].animate.move_to(eqs[4][12]))
+# 6th eq
 
 
-        # self.play(Write(eqs[0]))
-        # self.wait()
 
 
-        # for i in range(1, len(eqs)-1):
-        #     self.wait()
-        #     self.play(ReplacementTransform(eqs[i].copy(), eqs[i+1]))
+
+
+        self.play(eqs[4][0].animate.move_to(eqs[5][0]))
+
+        self.wait()
+
+# replacement.target_mobject
