@@ -248,6 +248,7 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
 
 class CreateHD(Scene):
     def construct(self):
+## 
         eqs = MathTex(r'EV_H &= EV_D\\',
                       r'H \big( {V \over 2} - { C \over 2 } \big) + DV &= 0 + D { V \over 2 }\\',
                       r'HV - HC + 2DV &= DV\\',
@@ -412,57 +413,6 @@ class CreateHD(Scene):
         self.wait(PAUSE)
 
 
-class test(Scene):
-    def construct(self):
-        eqs_left = [['EV_H'],
-                    ['{{H}}', '\\big(', '{', '{{V}}', '\\over', '2', '}', '-', '{', '{{C}}', '\\over', '2', '}', '\\big)', '+', 'DV'],
-                    ['{{H}}', '{{V}}', '{{-}}', '{{H}}', '{{C}}', '+', 'D', '{{V}}'],
-                    '{{H}} {{V}} {{-}} {{H}} {{C}}',
-                    '{{H}} {{V}} {{-}} {{H}} {{C}}',
-                    '{{H}} {{V}} {{-}} {{H}} {{C}}',
-                    '{{- H}} {{C}}', '{{=}}', '-{{V}}',
-                    '{{H}} {{C}}',
-                    '{{H}}']
-
-        eqs_right = [['EV_D'],
-                     ['0', '+', '{', '{{D}}', '\over', '2', '}'],
-                     ['{{-}}', '{{D}}', '{{V}}'],
-                     '{{-}} {{D}} {{V}}',
-                     '{{-}} (1 {{-}} {{H}}) {{V}}',
-                     '{{H}} {{V}} {{-}} {{V}}',
-                     '{{-}} {{V}}',
-                     '{{V}}',
-                     '{ {{V}} \\over {{C}} }']
-
-        eqs_eq = ['{{=}}']*len(eqs_left)
-
-        conds = ([r'V > C'],
-                 [r'V < C'],
-                 [r'H > \frac{V}{C}'],
-                 [r'H < \frac{V}{C}'])
-        
-        eq_start = MathTex(eqs_eq[0], font_size=FONT_SIZE_HAWK_DOVE).move_to([-2,3,0])
-        left_start = MathTex(*eqs_left[0], font_size=FONT_SIZE_HAWK_DOVE).next_to(eq_start, LEFT)
-        right_start = MathTex(*eqs_right[0], font_size=FONT_SIZE_HAWK_DOVE).next_to(eq_start, RIGHT)
-        self.play(Write(VGroup(left_start, eq_start, right_start)))
-        calc_eqs = [(left_start, eq_start, right_start)]
-
-        prev_left, prev_eq, prev_right = calc_eqs[0]
-        eq = MathTex(eqs_eq[1], font_size=FONT_SIZE_HAWK_DOVE).next_to(prev_eq, DOWN).shift(0.5*DOWN)
-        left = MathTex(*eqs_left[1], font_size=FONT_SIZE_HAWK_DOVE).next_to(eq, LEFT)
-        right = MathTex(*eqs_right[1], font_size=FONT_SIZE_HAWK_DOVE).next_to(eq, RIGHT)
-        self.play(Write(VGroup(left, eq, right)))
-        calc_eqs.append((left, eq, right))
-        
-        for i, (left, eq, right) in enumerate(zip(eqs_left[2:3], eqs_eq[2:3], eqs_right[2:3]), 2):
-            prev_left, prev_eq, prev_right = calc_eqs[i-1]
-            eq = MathTex(eq, font_size=FONT_SIZE_HAWK_DOVE).next_to(prev_eq, DOWN).shift(0.5*DOWN)
-            left = MathTex(*left, font_size=FONT_SIZE_HAWK_DOVE).next_to(eq, LEFT)
-            right = MathTex(*right, font_size=FONT_SIZE_HAWK_DOVE).next_to(eq, RIGHT)
-            calc_eqs.append((left, eq, right))
-            self.play(TransformMatchingTex(prev_left.copy(), left), TransformMatchingTex(prev_eq.copy(), eq), TransformMatchingTex(prev_right.copy(), right))
-
-
 class Main(Scene):
     def construct(self):
 
@@ -494,7 +444,7 @@ class Main(Scene):
                     header_col = WHITE,
                     border_col = BLUE_D,
                     header_font_size = 30).shift(UP)
-        
+
 
         value = MathTex('{{V}}')
         cost = MathTex('{{C}}')
@@ -546,54 +496,63 @@ class Main(Scene):
 
 # 1st eq
         self.play(Write(eqs[0]))
-
 # 2nd eq
         self.play(FadeIn(eqs[1][13]))
-        self.play(hawks[0].copy().animate.scale(2).move_to(eqs[1][0]))
-        self.play(FadeIn(eqs[1][1]), FadeIn(eqs[1][9]), table_2.get_payoffs(0,0,0).copy().animate.scale(2).move_to(eqs[1][2:9]))
+        self.play(hawks[0].copy().animate.move_to(eqs[1][0]))
+        self.play(FadeIn(eqs[1][1]), FadeIn(eqs[1][9]), table_2.get_payoffs(0,0,0).copy().animate.move_to(eqs[1][2:9]))
         self.play(FadeIn(eqs[1][10]))
-        self.play(doves.copy().scale(2).animate.move_to(eqs[1][11]))
-        self.play(table_2.get_payoffs(0,1,0).copy().animate.scale(1).move_to(eqs[1][12]))
+        self.play(doves.copy().animate.move_to(eqs[1][11]))
+        self.play(table_2.get_payoffs(0,1,0).copy().animate.move_to(eqs[1][12]))
         self.play(FadeIn(eqs[1][13]))
-        self.play(table_2.get_payoffs(1,0,0).copy().animate.scale(1).move_to(eqs[1][14]))
+        self.play(table_2.get_payoffs(1,0,0).copy().animate.move_to(eqs[1][14]))
         self.play(FadeIn(eqs[1][15]))
-        self.play(doves.copy().animate.scale(2).move_to(eqs[1][16]))
-        self.play(table_2.get_payoffs(1,1,0).copy().animate.scale(1).move_to(eqs[1][17:20]))
-
+        self.play(doves.copy().animate.move_to(eqs[1][16]))
+        self.play(table_2.get_payoffs(1,1,0).copy().animate.move_to(eqs[1][17:20]))
 # 3rd eq
+        self.play(FadeIn(eqs[2][9]))
         self.play(eqs[1][0].copy().animate.move_to(eqs[2][0]),
                   eqs[1][2].copy().animate.move_to(eqs[2][1]),
                   eqs[1][5].copy().animate.move_to(eqs[2][2]),
                   eqs[1][0].copy().animate.move_to(eqs[2][3]),
                   eqs[1][6].copy().animate.move_to(eqs[2][4]))
-
         self.play(eqs[1][10].copy().animate.move_to(eqs[2][5]),
                   FadeIn(eqs[2][6]),
                   eqs[1][11].copy().animate.move_to(eqs[2][7]),
                   eqs[1][12].copy().animate.move_to(eqs[2][8]))
-        self.play(FadeIn(eqs[2][9]))
-        
         self.play(eqs[1][16].copy().animate.move_to(eqs[2][10]),
                   eqs[1][17].copy().animate.move_to(eqs[2][11]))
-
 # 4th eq
-        self.play(eqs[2][0:5].animate.move_to(eqs[3][0:5]))
         self.play(FadeIn(eqs[3][5]))
+        self.play(eqs[2][0:5].animate.move_to(eqs[3][0:5]))
         self.play(FadeIn(eqs[3][6]), eqs[2][10:12].animate.move_to(eqs[3][7:9]))
 # 5th eq
-        self.play(eqs[3][0:5].animate.move_to(eqs[4][0:5]))
         self.play(FadeIn(eqs[4][5]))
-        self.play(eqs[3][6].copy().animate.move_to(eqs[4][6]))
-        self.play(FadeIn(eqs[4][7]), FadeIn(eqs[4][11]), Transform(eqs[3][7].copy(), eqs[4][8:11]))
-        self.play(eqs[3][8].animate.move_to(eqs[4][12]))
+        self.play(eqs[3][0:5].animate.move_to(eqs[4][0:5]))
+        self.play(eqs[3][6].copy().animate.move_to(eqs[4][6]),
+                  FadeIn(eqs[4][7]), FadeIn(eqs[4][11]), Transform(eqs[3][7].copy(), eqs[4][8:11]),
+                  eqs[3][8].animate.move_to(eqs[4][12]))
 # 6th eq
-
-
-
-
-
-
-        self.play(eqs[4][0].animate.move_to(eqs[5][0]))
+        self.play(FadeIn(eqs[5][5]))
+        self.play(eqs[4][0:5].animate.move_to(eqs[5][0:5]))
+        self.play(eqs[4][6].animate.move_to(eqs[5][8]),
+                  eqs[4][9].animate.move_to(eqs[5][8]),
+                  eqs[4][10].animate.move_to(eqs[5][6]),
+                  Transform(VGroup(eqs[4][8], eqs[4][12]), eqs[5][7]),
+                  eqs[4][12].animate.move_to(eqs[5][9]))
+# 7th eq
+        self.play(FadeIn(eqs[6][3]))
+        self.play(eqs[5][2:5].animate.move_to(eqs[6][0:3]))
+        self.play(eqs[5][6:8].animate.move_to(eqs[6][4:6]))
+# 8th eq
+        self.play(FadeIn(eqs[7][2]))
+        self.play(eqs[6][1:3].animate.move_to(eqs[7][0:2]))
+        self.play(eqs[6][5].animate.move_to(eqs[7][3]))
+# 9th eq
+        self.play(eqs[7][0].animate.move_to(eqs[8][0]),
+                  eqs[7][2].copy().animate.move_to(eqs[8][1]),
+                  eqs[7][3].animate.move_to(eqs[8][2]),
+                  FadeIn(eqs[8][3]),
+                  eqs[7][1].animate.move_to(eqs[8][4]))
 
         self.wait()
 
