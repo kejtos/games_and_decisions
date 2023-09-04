@@ -28,6 +28,7 @@ FONT_SIZE_HAWK_DOVE = 30
 FONT_SIZE_GENERAL = 36
 FONT_SIZE_HEADINGS = 36
 MAIN_COLOR = BLUE_D
+FONT_BULLETS = 18
 
 
 class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na textu
@@ -291,18 +292,32 @@ class CreateHD(Scene):
         self.play(FadeOut(VGroup(*nash_rects, table_1, text_below_table)))
 
 ## Theory about cooperation
-        cooperation_and_altruism = Text('Cooperation and altruism').to_edge(UL)
-        why_coop = Text('Why would animals cooperate? How could altruism survive?')
-        group_sel = Text('Group selection')
-        self_gene = Text('Selfish gene')
-        gs_b1 = Text('Individuals do it for the good of the group')
-        gs_b2 = Text('Minority view')
-        sg_b1 = Text('Sharing strategy may be self-serving')
-        sg_b2 = Text('Majority view')
+        line_1 = Line(start=[-0.5,1,0], end=[-5.5,1,0], stroke_width=0.8)
+        line_2 = Line(start=[0.5,1,0], end=[5.5,1,0], stroke_width=0.8)
+        line_3 = Line(start=[0,0.9,0], end=[0,-3.5,0], stroke_width=0.8)
+        cooperation_and_altruism = Text('Cooperation and altruism', font_size=FONT_SIZE_HEADINGS).to_edge(UL)
+        why_coop = Text('Why would animals cooperate? How could altruism survive?', font_size=28).move_to([0,1.8,0])
+        
+        group_sel = Text('Group selection', font_size=24, weight=BOLD).next_to(line_1, 2*DOWN)#.align_to(line_1, RIGHT).shift(LEFT)
+        self_gene = Text('Selfish gene', font_size=24, weight=BOLD).next_to(line_2, 2*DOWN)#.align_to(line_2, LEFT).shift(RIGHT)
+        
+        gs_b1 = Text('Individuals do it for the good of the group', font_size=FONT_BULLETS).next_to(group_sel, 3*DOWN)
+        gs_b2 = Text('Minority view', font_size=FONT_BULLETS).next_to(gs_b1, 3*DOWN).align_to(gs_b1, LEFT).set_color(MAROON_D)
+
+        sg_b1 = Text('Sharing strategy may be self-serving', font_size=FONT_BULLETS).next_to(self_gene, 3*DOWN)
+        sg_b2 = Text('Majority view', font_size=FONT_BULLETS).next_to(sg_b1, 3*DOWN).align_to(sg_b1, LEFT).set_color(GREEN_C)
 
 
         self.play(Write(cooperation_and_altruism))
-        self.play(FadeOut(cooperation_and_altruism))
+        self.play(Write(why_coop[:25]))
+        self.play(Write(why_coop[25:]))
+        self.play(*[Write(line) for line in [line_1, line_2, line_3]])
+        self.play(Write(group_sel))
+        self.play(Write(gs_b1))
+        self.play(Write(self_gene))
+        self.play(Write(sg_b1))
+        self.play(Write(gs_b2), Write(sg_b2))
+        self.play(*[FadeOut(mobj) for mobj in [line_1, line_2, line_3, cooperation_and_altruism, why_coop, group_sel, self_gene, gs_b1, gs_b2, sg_b1, sg_b2]])
 
 ## Hawk and Dove
         eqs = MathTex(r'EV_H &= EV_D\\',
@@ -370,12 +385,17 @@ class CreateHD(Scene):
 
         val_copy = value.copy()
         cost_copy = cost.copy()
+        val_copy2 = value.copy()
+        cost_copy2 = cost.copy()
+        val_copy3 = value.copy()
+        
         self.play(AnimationGroup(val_copy.animate.move_to(table_2.get_payoffs(0,0,0)[0][0]), FadeIn(table_2.get_payoffs(0,0,0)[0][1:3])))
         self.play(cost_copy.animate.move_to(table_2.get_payoffs(0,0,0)[0][4]), FadeIn(table_2.get_payoffs(0,0,0)[0][3]), FadeIn(table_2.get_payoffs(0,0,0)[0][5:]))
+        self.play(val_copy2.animate.move_to(table_2.get_payoffs(0,1,0)[0][0]))
         self.play(Create(table_2.get_payoffs(1,0,0)))
-        self.add(table_2.get_payoffs(0,0,0))
-        self.remove(val_copy, cost_copy)
-        self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(1,1,0)))
+        self.play(val_copy3.animate.move_to(table_2.get_payoffs(1,1,0)[0][0]), FadeIn(table_2.get_payoffs(1,1,0)[0][1:]))
+        self.add(table_2.get_payoffs(0,0,0), table_2.get_payoffs(0,1,0), table_2.get_payoffs(1,1,0))
+        self.remove(val_copy, cost_copy, val_copy2, cost_copy2, val_copy3)
 
         self.play(ext_table.animate.scale(0.5).to_edge(UR))
 
@@ -445,11 +465,34 @@ class CreateHD(Scene):
                   FadeIn(eqs[8][3]),
                   eqs[7][1].animate.move_to(eqs[8][4]))
 
+## Predator-Prey introduction
+        fox_path = r"C:\Users\Honzík\OneDrive - Vysoká škola ekonomická v Praze\Connection\Plocha\Ucení\Game theory\biology\fox.png"
+        rab_path = r"C:\Users\Honzík\OneDrive - Vysoká škola ekonomická v Praze\Connection\Plocha\Ucení\Game theory\biology\rabbit.png"
+        foxrab_path = r"C:\Users\Honzík\OneDrive - Vysoká škola ekonomická v Praze\Connection\Plocha\Ucení\Game theory\biology\fox_v_rabbit.png"
+
+        # Create an ImageMobject with the image
+        fox_img_dot = Dot().move_to([-1,0,0])
+        rab_img_dot = Dot().move_to([1,0,0])
+        fox_img = ImageMobject(fox_path)
+        rab_img = ImageMobject(rab_path)
+        foxrab_img = ImageMobject(foxrab_path)
+
+        # Set the position and scale of the image
+        fox_img.scale(1.5).align_to(fox_img_dot, RIGHT)
+        rab_img.scale(1.5).align_to(rab_img_dot, LEFT)
+        crossos = Cross(color=MAROON_D, stroke_width=20, scale_factor=.2)
+        foxrab_img.scale(1.8).move_to([0,-1,0])
+
+        self.play(FadeIn(fox_img))
+        self.play(Write(crossos))
+        self.play(FadeIn(rab_img))
+        self.play(fox_img.animate.shift(UP), rab_img.animate.shift(UP), crossos.animate.shift(UP))
+        self.play(FadeIn(foxrab_img))
 ## Predator-Prey
         rabbits = Text('Rabbits:', font_size=FONT_SIZE_GENERAL).move_to([-5,2,0])
         rabbits_eq = MathTex(r'{dx \over dt} = \alpha x - \beta xy').next_to(rabbits, RIGHT)
         foxes = Text('Foxes:', font_size=FONT_SIZE_GENERAL).next_to(rabbits, DOWN).shift(DOWN)
-        foxes_eq = MathTex(r'{dy \over dt = \gamma xy - \delta y').align_to(rabbits_eq, LEFT).next_to(rabbits_eq, DOWN)
+        foxes_eq = MathTex(r'{dy \over dt} = \gamma xy - \delta y').align_to(rabbits_eq, LEFT).next_to(rabbits_eq, DOWN)
 
         pp_conds = [['x', 'y', 't', r'{dx \over dt}', r'{dy \over dt}', r'\alpha', r'\beta', r'\gamma', r'\delta'],
                     [r'\text{--- number of rabbits per square km}', r'\text{--- number of foxes per square km}', r'\text{--- time}', r'\text{--- growth rate of rabbits}', r'\text{--- growth rate of rabbits}',
@@ -485,21 +528,32 @@ class CreateHD(Scene):
         self.wait(PAUSE)
 
 
-FONT_BULLETS = 16
 class Main(Scene):
     def construct(self):
-        line_1 = Line(start=[-5,1,0], end=[-0.5,1,0], stroke_width=0.8)
-        line_2 = Line(start=[0.5,1,0], end=[5,1,0], stroke_width=0.8)
-        line_3 = Line(start=[0,0.9,0], end=[0,-3.5,0], stroke_width=0.8)
-        cooperation_and_altruism = Text('Cooperation and altruism', font_size=FONT_SIZE_HEADINGS).to_edge(UL)
-        why_coop = Text('Why would animals cooperate? How could altruism survive?', font_size=28).move_to([0,1.8,0])
-        
-        group_sel = Text('Group selection', font_size=24, weight=BOLD).next_to(line_1, 2*DOWN)#.align_to(line_1, RIGHT).shift(LEFT)
-        self_gene = Text('Selfish gene', font_size=24, weight=BOLD).next_to(line_2, 2*DOWN)#.align_to(line_2, LEFT).shift(RIGHT)
-        
-        gs_b1 = Text(r'•  Individuals do it for the good of the group', font_size=FONT_BULLETS).next_to(group_sel, 3*DOWN)
-        gs_b2 = Text(r'•  Minority view', font_size=FONT_BULLETS).next_to(gs_b1, 3*DOWN).align_to(gs_b1, LEFT)
+        # Define the file path to your PNG image
+        fox_path = r"C:\Users\Honzík\OneDrive - Vysoká škola ekonomická v Praze\Connection\Plocha\Ucení\Game theory\biology\fox.png"
+        rab_path = r"C:\Users\Honzík\OneDrive - Vysoká škola ekonomická v Praze\Connection\Plocha\Ucení\Game theory\biology\rabbit.png"
+        foxrab_path = r"C:\Users\Honzík\OneDrive - Vysoká škola ekonomická v Praze\Connection\Plocha\Ucení\Game theory\biology\fox_v_rabbit.png"
 
-        sg_b1 = Text(r'•  Sharing strategy may be self-serving', font_size=FONT_BULLETS).next_to(self_gene, 3*DOWN)
-        sg_b2 = Text(r'•  Majority view', font_size=FONT_BULLETS).next_to(sg_b1, 3*DOWN).align_to(sg_b1, LEFT)
-        self.add(cooperation_and_altruism, why_coop, group_sel, self_gene, gs_b1, gs_b2, sg_b1, sg_b2, line_1, line_2, line_3)
+        # Create an ImageMobject with the image
+        fox_img_dot = Dot().move_to([-1,0,0])
+        rab_img_dot = Dot().move_to([1,0,0])
+        fox_img = ImageMobject(fox_path)
+        rab_img = ImageMobject(rab_path)
+        foxrab_img = ImageMobject(foxrab_path)
+
+        # Set the position and scale of the image
+        fox_img.scale(1.5).align_to(fox_img_dot, RIGHT)
+        rab_img.scale(1.5).align_to(rab_img_dot, LEFT)
+        crossos = Cross(color=MAROON_D, stroke_width=20, scale_factor=.2)
+        foxrab_img.scale(1.8).move_to([0,-1,0])
+
+        self.play(FadeIn(fox_img))
+        self.play(Write(crossos))
+        self.play(FadeIn(rab_img))
+        self.play(fox_img.animate.shift(UP), rab_img.animate.shift(UP), crossos.animate.shift(UP))
+        self.play(FadeIn(foxrab_img))
+        self.wait(1)
+
+
+
