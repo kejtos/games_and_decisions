@@ -26,12 +26,8 @@ TABLE_HEIGHT = 5.0
 FONT_SIZE_PREDATOR_PREY = 26
 FONT_SIZE_HAWK_DOVE = 30
 FONT_SIZE_GENERAL = 36
+FONT_SIZE_HEADINGS = 36
 MAIN_COLOR = BLUE_D
-
-
-
-def division(n, d):
-    return ['{', n, r'\over', d, '}']
 
 
 class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na textu
@@ -248,23 +244,12 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
 
 class CreateHD(Scene):
     def construct(self):
-## 
-        eqs = MathTex(r'EV_H &= EV_D\\',
-                      r'H \big( {V \over 2} - { C \over 2 } \big) + DV &= 0 + D { V \over 2 }\\',
-                      r'HV - HC + 2DV &= DV\\',
-                      r'HV - HC &= -DV\\',
-                      r'HV - HC &= -(1-H)V\\',
-                      r'HV - HC &= HV - V\\',
-                      r'-HC &= -V\\',
-                      r'HC &= V\\',
-                      r'H &= {V \over C}\\',
-                      font_size=FONT_SIZE_HAWK_DOVE).to_edge(UL)
-
         conds = ([r'V > C'],
                  [r'V < C'],
                  [r'H > \frac{V}{C}'],
                  [r'H < \frac{V}{C}'])
 
+## Prisoner's dilemma
         table_1 = GTtable(table_strs=[[('1', '1'), ('3', '0')], [('0', '3'), ('2', '2')]],
                           row_headers=['Fight', 'Share'],
                           col_headers=['Fight', 'Share'],
@@ -281,7 +266,6 @@ class CreateHD(Scene):
         row_headers = table_1.get_row_headers()
         col_headers = table_1.get_col_headers()
         recall_prisoners_dilemma = Text('Let\'s recall prisoner\'s dilemma.')
-        cooperation_and_altruism = Text('Cooperation and altruism').to_edge(UL)
 
         text_below_table = Text('Once again, Prisoner\'s dilemma is \"a reason why we can\'t have nice things.\"', font_size=28, color=WHITE).next_to(table_1.frame.get_bottom(), DOWN).shift(DOWN)
 
@@ -305,133 +289,38 @@ class CreateHD(Scene):
 
         self.play(Write(text_below_table))
         self.play(FadeOut(VGroup(*nash_rects, table_1, text_below_table)))
+
+## Theory about cooperation
+        cooperation_and_altruism = Text('Cooperation and altruism').to_edge(UL)
+        why_coop = Text('Why would animals cooperate? How could altruism survive?')
+        group_sel = Text('Group selection')
+        self_gene = Text('Selfish gene')
+        gs_b1 = Text('Individuals do it for the good of the group')
+        gs_b2 = Text('Minority view')
+        sg_b1 = Text('Sharing strategy may be self-serving')
+        sg_b2 = Text('Majority view')
+
+
         self.play(Write(cooperation_and_altruism))
         self.play(FadeOut(cooperation_and_altruism))
 
-        hawk_fight = MathTex('{', *division('{{V}}', '2'), '-', *division('{{C}}', '2'), '}')
-        hawk_share = MathTex('{{V}}')
-        dove_fight = MathTex('0')
-        dove_share = MathTex(*division('{{V}}', '2'))
-
-        table_2 = GTtable(table_strs=[[hawk_fight, hawk_share], [dove_fight, dove_share]],
-                    row_headers=['Hawk meets', 'Dove meets'],
-                    col_headers=['Hawk', 'Dove'],
-                    table_width = TABLE_WIDTH,
-                    table_height = TABLE_HEIGHT,
-                    n_rows = 2,
-                    n_cols = 2,
-                    payoff_col = WHITE,
-                    header_col = WHITE,
-                    border_col = BLUE_D,
-                    header_font_size = 30).shift(UP)
-
-        value = MathTex('{{V}}')
-        cost = MathTex('{{C}}')
-        hawks = MathTex('{{H}}')
-        doves = MathTex('{{D}}')
-        value_desc = MathTex(r'\text{--- Value or payoff}', font_size=FONT_SIZE_GENERAL)
-        cost_desc = MathTex(r'\text{--- Cost}', font_size=FONT_SIZE_GENERAL)
-        hawks_desc = MathTex(r'\text{--- Proportion of hawks}', font_size=FONT_SIZE_GENERAL)
-        doves_desc = MathTex(r'\text{--- Proportion of doves}', font_size=FONT_SIZE_GENERAL)
-        one_minus_hawks = MathTex('1 - H', font_size=FONT_SIZE_GENERAL)
-
-        rabbits = Text('Rabbits:', font_size=FONT_SIZE_GENERAL).move_to([-5,2,0])
-        rabbits_eq = MathTex(*division('dx', 'dt'), '=', r'\alpha x', '-', r'\beta xy').next_to(rabbits, RIGHT)
-        foxes = Text('Foxes:', font_size=FONT_SIZE_GENERAL).next_to(rabbits, DOWN).shift(DOWN)
-        foxes_eq = MathTex(*division('dy', 'dt'), '=', r'\gamma xy', '-', r'\delta y').align_to(rabbits_eq, LEFT).next_to(rabbits_eq, DOWN)
-
-        pp_conds = [['x', 'y', 't', division('dx', 'dt'), division('dy', 'dt'), r'\alpha', r'\beta', r'\gamma', r'\delta'],
-                    [r'\text{--- number of rabbits per square km}', r'\text{--- number of foxes per square km}', r'\text{--- time}', r'\text{--- growth rate of rabbits}', r'\text{--- growth rate of rabbits}',
-                     r'\text{--- maximum growth rate of rabbits}', r'\text{--- effect of foxes on the growth rate of rabbits}', r'\text{--- effect of rabbits on the growth rate of foxes}', r'\text{--- death rate of foxes}']]
-
-        pp_conds_mtex = []
-        pp_conds_mtex.append((MathTex(pp_conds[0][0], font_size=FONT_SIZE_PREDATOR_PREY).move_to([0, 3, 0]),
-                              MathTex(pp_conds[1][0], font_size=FONT_SIZE_PREDATOR_PREY)))
-        pp_conds_mtex[0][1].next_to(pp_conds_mtex[0][0].get_center(), RIGHT)
-
-        for i, _ in enumerate(pp_conds[0][1:], 1):
-            if isinstance(pp_conds[0][i], list):
-                pp_conds_mtex.append((MathTex(*pp_conds[0][i], font_size=FONT_SIZE_PREDATOR_PREY).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
-                                      MathTex(pp_conds[1][i], font_size=FONT_SIZE_PREDATOR_PREY)))
-                pp_conds_mtex[i][1].next_to(pp_conds_mtex[i][0].get_center(), RIGHT)
-            else:
-                pp_conds_mtex.append((MathTex(pp_conds[0][i], font_size=FONT_SIZE_PREDATOR_PREY).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
-                                      MathTex(pp_conds[1][i], font_size=FONT_SIZE_PREDATOR_PREY)))
-                pp_conds_mtex[i][1].next_to(pp_conds_mtex[i][0].get_center(), RIGHT)
-
-
-        value.next_to(table_2.frame, DOWN).align_to(table_2.frame, LEFT)
-        value_desc.next_to(value, RIGHT)
-        cost.next_to(value, DOWN)
-        cost_desc.next_to(cost, RIGHT)
-        hawks.next_to(value_desc, buff=1)
-        hawks_desc.next_to(hawks, RIGHT)
-        doves.next_to(hawks, DOWN)
-        doves_desc.next_to(doves)
-        ext_table = VGroup(table_2, value_desc, value, cost, cost_desc, hawks, hawks_desc, doves, doves_desc)
-
-        self.play(FadeIn(table_2.frame))
-
-        self.play(Write(table_2.get_row_headers(0)))
-        self.play(Write(table_2.get_row_headers(1)))
-        self.play(Write(table_2.get_col_headers(0)))
-        self.play(Write(table_2.get_col_headers(1)))
-
-        self.play(Write(VGroup(value, value_desc)))
-        self.play(Write(VGroup(cost, cost_desc)))
-        self.play(Write(VGroup(hawks, hawks_desc)))
-        self.play(Write(VGroup(doves, doves_desc)))
-
-        self.play(TransformMatchingTex(VGroup(value.copy(), cost.copy()), table_2.get_payoffs(0,0,0)))
-        self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(0,1,0)))
-        self.play(Create(table_2.get_payoffs(1,0,0)))
-        self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(1,1,0)))
-
-        self.play(ext_table.animate.scale(0.5).to_edge(UR))
-        
-        self.play(Write(eqs[0]))
-        self.wait()
-
-        self.play(Write(eqs[1]))
-        self.wait()
-
-        for i in range(1, len(eqs)-1):
-            self.wait()
-            self.play(ReplacementTransform(eqs[i].copy(), eqs[i+1]))
-    
-        self.play(FadeOut(VGroup(eqs, ext_table)))
-        
-        for textos, textos2 in pp_conds_mtex:
-            self.play(Create(VGroup(textos, textos2)))
-
-        self.play(FadeIn(rabbits))
-        self.play(FadeIn(rabbits_eq))
-        
-        self.play(FadeIn(foxes))
-        self.play(FadeIn(foxes_eq))
-
-        self.wait(PAUSE)
-
-
-class Main(Scene):
-    def construct(self):
-
+## Hawk and Dove
         eqs = MathTex(r'EV_H &= EV_D\\',
-                      r'H \big( {V \over 2} - {C \over 2} \big) + DV &= 0 + D {V \over 2}\\',
-                      r'HV - HC + 2DV &= DV\\',
-                      r'HV - HC &= -DV\\',
-                      r'HV - HC &= -(1-H)V\\',
-                      r'HV - HC &= HV - V\\',
-                      r'-HC &= -V\\',
-                      r'HC &= V\\',
-                      r'H &= {V \over C}\\',
-                      font_size=FONT_SIZE_HAWK_DOVE).to_edge(UL)
+                r'H \big( {V \over 2} - {C \over 2} \big) + DV &= 0 + D {V \over 2}\\',
+                r'HV - HC + 2DV &= DV\\',
+                r'HV - HC &= -DV\\',
+                r'HV - HC &= -(1-H)V\\',
+                r'HV - HC &= HV - V\\',
+                r'-HC &= -V\\',
+                r'HC &= V\\',
+                r'H &= {V \over C}\\',
+                font_size=FONT_SIZE_HAWK_DOVE).to_edge(UL)
+        for eq in eqs: index_labels(eq)
 
-
-        hawk_fight = MathTex('{', *division('{{V}}', '2'), '-', *division('{{C}}', '2'), '}')
+        hawk_fight = MathTex(r'{V \over 2} - {C \over 2}')
         hawk_share = MathTex('{{V}}')
         dove_fight = MathTex('0')
-        dove_share = MathTex(*division('{{V}}', '2'))
+        dove_share = MathTex(r'{V \over 2}')
 
         table_2 = GTtable(table_strs=[[hawk_fight, hawk_share], [dove_fight, dove_share]],
                     row_headers=['Hawk meets', 'Dove meets'],
@@ -444,7 +333,6 @@ class Main(Scene):
                     header_col = WHITE,
                     border_col = BLUE_D,
                     header_font_size = 30).shift(UP)
-
 
         value = MathTex('{{V}}')
         cost = MathTex('{{C}}')
@@ -466,6 +354,8 @@ class Main(Scene):
         doves_desc.next_to(doves)
         ext_table = VGroup(table_2, value_desc, value, cost, cost_desc, hawks, hawks_desc, doves, doves_desc)
 
+        index_labels(table_2.get_payoffs(0,0,0)[0])
+
         self.play(FadeIn(table_2.frame))
 
         self.play(Write(table_2.get_row_headers(0)))
@@ -478,35 +368,36 @@ class Main(Scene):
         self.play(Write(VGroup(hawks, hawks_desc)))
         self.play(Write(VGroup(doves, doves_desc)))
 
-        self.play(TransformMatchingTex(VGroup(value.copy(), cost.copy()), table_2.get_payoffs(0,0,0)))
-        self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(0,1,0)))
+        val_copy = value.copy()
+        cost_copy = cost.copy()
+        self.play(AnimationGroup(val_copy.animate.move_to(table_2.get_payoffs(0,0,0)[0][0]), FadeIn(table_2.get_payoffs(0,0,0)[0][1:3])))
+        self.play(cost_copy.animate.move_to(table_2.get_payoffs(0,0,0)[0][4]), FadeIn(table_2.get_payoffs(0,0,0)[0][3]), FadeIn(table_2.get_payoffs(0,0,0)[0][5:]))
         self.play(Create(table_2.get_payoffs(1,0,0)))
+        self.add(table_2.get_payoffs(0,0,0))
+        self.remove(val_copy, cost_copy)
         self.play(TransformMatchingTex(value.copy(), table_2.get_payoffs(1,1,0)))
 
         self.play(ext_table.animate.scale(0.5).to_edge(UR))
-
-        for eq in eqs:
-            index_labels(eq)
-        index_labels(hawks)
-        index_labels(doves)
-        index_labels(table_2.get_payoffs(0,0,0))
-        index_labels(table_2.get_payoffs(0,1,0))
-        index_labels(table_2.get_payoffs(1,0,0))
-        index_labels(table_2.get_payoffs(1,1,0))
 
 # 1st eq
         self.play(Write(eqs[0]))
 # 2nd eq
         self.play(FadeIn(eqs[1][13]))
+        self.play(Indicate(hawks[0]))
         self.play(hawks[0].copy().animate.move_to(eqs[1][0]))
+        self.play(Indicate(table_2.get_payoffs(0,0,0)))
         self.play(FadeIn(eqs[1][1]), FadeIn(eqs[1][9]), table_2.get_payoffs(0,0,0).copy().animate.move_to(eqs[1][2:9]))
         self.play(FadeIn(eqs[1][10]))
+        self.play(Indicate(doves))
         self.play(doves.copy().animate.move_to(eqs[1][11]))
+        self.play(Indicate(table_2.get_payoffs(0,1,0)))
         self.play(table_2.get_payoffs(0,1,0).copy().animate.move_to(eqs[1][12]))
-        self.play(FadeIn(eqs[1][13]))
+        self.play(Indicate(table_2.get_payoffs(1,0,0)))
         self.play(table_2.get_payoffs(1,0,0).copy().animate.move_to(eqs[1][14]))
         self.play(FadeIn(eqs[1][15]))
+        self.play(Indicate(doves))
         self.play(doves.copy().animate.move_to(eqs[1][16]))
+        self.play(Indicate(table_2.get_payoffs(1,1,0)))
         self.play(table_2.get_payoffs(1,1,0).copy().animate.move_to(eqs[1][17:20]))
 # 3rd eq
         self.play(FadeIn(eqs[2][9]))
@@ -554,6 +445,61 @@ class Main(Scene):
                   FadeIn(eqs[8][3]),
                   eqs[7][1].animate.move_to(eqs[8][4]))
 
-        self.wait()
+## Predator-Prey
+        rabbits = Text('Rabbits:', font_size=FONT_SIZE_GENERAL).move_to([-5,2,0])
+        rabbits_eq = MathTex(r'{dx \over dt} = \alpha x - \beta xy').next_to(rabbits, RIGHT)
+        foxes = Text('Foxes:', font_size=FONT_SIZE_GENERAL).next_to(rabbits, DOWN).shift(DOWN)
+        foxes_eq = MathTex(r'{dy \over dt = \gamma xy - \delta y').align_to(rabbits_eq, LEFT).next_to(rabbits_eq, DOWN)
 
-# replacement.target_mobject
+        pp_conds = [['x', 'y', 't', r'{dx \over dt}', r'{dy \over dt}', r'\alpha', r'\beta', r'\gamma', r'\delta'],
+                    [r'\text{--- number of rabbits per square km}', r'\text{--- number of foxes per square km}', r'\text{--- time}', r'\text{--- growth rate of rabbits}', r'\text{--- growth rate of rabbits}',
+                     r'\text{--- maximum growth rate of rabbits}', r'\text{--- effect of foxes on the growth rate of rabbits}', r'\text{--- effect of rabbits on the growth rate of foxes}', r'\text{--- death rate of foxes}']]
+
+        pp_conds_mtex = []
+        pp_conds_mtex.append((MathTex(pp_conds[0][0], font_size=FONT_SIZE_PREDATOR_PREY).move_to([0, 3, 0]),
+                              MathTex(pp_conds[1][0], font_size=FONT_SIZE_PREDATOR_PREY)))
+        pp_conds_mtex[0][1].next_to(pp_conds_mtex[0][0].get_center(), RIGHT)
+
+        for i, _ in enumerate(pp_conds[0][1:], 1):
+            if isinstance(pp_conds[0][i], list):
+                pp_conds_mtex.append((MathTex(*pp_conds[0][i], font_size=FONT_SIZE_PREDATOR_PREY).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
+                                      MathTex(pp_conds[1][i], font_size=FONT_SIZE_PREDATOR_PREY)))
+                pp_conds_mtex[i][1].next_to(pp_conds_mtex[i][0].get_center(), RIGHT)
+            else:
+                pp_conds_mtex.append((MathTex(pp_conds[0][i], font_size=FONT_SIZE_PREDATOR_PREY).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
+                                      MathTex(pp_conds[1][i], font_size=FONT_SIZE_PREDATOR_PREY)))
+                pp_conds_mtex[i][1].next_to(pp_conds_mtex[i][0].get_center(), RIGHT)
+
+        self.play(*[FadeOut(mob) for mob in self.mobjects])
+        # self.foreground_mobjects
+        
+        for textos, textos2 in pp_conds_mtex:
+            self.play(Create(VGroup(textos, textos2)))
+
+        self.play(FadeIn(rabbits))
+        self.play(FadeIn(rabbits_eq))
+        
+        self.play(FadeIn(foxes))
+        self.play(FadeIn(foxes_eq))
+
+        self.wait(PAUSE)
+
+
+FONT_BULLETS = 16
+class Main(Scene):
+    def construct(self):
+        line_1 = Line(start=[-5,1,0], end=[-0.5,1,0], stroke_width=0.8)
+        line_2 = Line(start=[0.5,1,0], end=[5,1,0], stroke_width=0.8)
+        line_3 = Line(start=[0,0.9,0], end=[0,-3.5,0], stroke_width=0.8)
+        cooperation_and_altruism = Text('Cooperation and altruism', font_size=FONT_SIZE_HEADINGS).to_edge(UL)
+        why_coop = Text('Why would animals cooperate? How could altruism survive?', font_size=28).move_to([0,1.8,0])
+        
+        group_sel = Text('Group selection', font_size=24, weight=BOLD).next_to(line_1, 2*DOWN)#.align_to(line_1, RIGHT).shift(LEFT)
+        self_gene = Text('Selfish gene', font_size=24, weight=BOLD).next_to(line_2, 2*DOWN)#.align_to(line_2, LEFT).shift(RIGHT)
+        
+        gs_b1 = Text(r'•  Individuals do it for the good of the group', font_size=FONT_BULLETS).next_to(group_sel, 3*DOWN)
+        gs_b2 = Text(r'•  Minority view', font_size=FONT_BULLETS).next_to(gs_b1, 3*DOWN).align_to(gs_b1, LEFT)
+
+        sg_b1 = Text(r'•  Sharing strategy may be self-serving', font_size=FONT_BULLETS).next_to(self_gene, 3*DOWN)
+        sg_b2 = Text(r'•  Majority view', font_size=FONT_BULLETS).next_to(sg_b1, 3*DOWN).align_to(sg_b1, LEFT)
+        self.add(cooperation_and_altruism, why_coop, group_sel, self_gene, gs_b1, gs_b2, sg_b1, sg_b2, line_1, line_2, line_3)
