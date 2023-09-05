@@ -4,6 +4,10 @@ import cv2
 import numpy as np
 from typing import Optional
 from scipy.integrate import odeint
+import numpy as np
+from numpy import random
+from scipy.integrate import odeint
+import pylab as p
 
 X_MOVE = 5.5
 Y_MOVE = 2
@@ -29,6 +33,20 @@ FONT_SIZE_GENERAL = 36
 FONT_SIZE_HEADINGS = 36
 MAIN_COLOR = BLUE_D
 FONT_BULLETS = 18
+
+
+def predator_prey(vars, t, params):
+    x = vars[0]
+    y = vars[1]
+    a = params[0]
+    b = params[1]
+    c = params[2]
+    d = params[3]
+
+    dxdt  =    a*x - b*x*y
+    dydt  =  c*x*y - d*y
+
+    return [dxdt, dydt]
 
 
 class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na textu
@@ -530,30 +548,25 @@ class CreateHD(Scene):
 
 class Main(Scene):
     def construct(self):
-        # Define the file path to your PNG image
-        fox_path = r"C:\Users\Honzík\OneDrive - Vysoká škola ekonomická v Praze\Connection\Plocha\Ucení\Game theory\biology\fox.png"
-        rab_path = r"C:\Users\Honzík\OneDrive - Vysoká škola ekonomická v Praze\Connection\Plocha\Ucení\Game theory\biology\rabbit.png"
-        foxrab_path = r"C:\Users\Honzík\OneDrive - Vysoká škola ekonomická v Praze\Connection\Plocha\Ucení\Game theory\biology\fox_v_rabbit.png"
+        t = np.linspace(0, 10, num=10000)
+        a = 1.5
+        b = 1.5
+        c = 1
+        d = 2
+        vars_0 = [1, 2]
+        params = [a, b, c, d]
+        y = odeint(predator_prey, vars_0, t, args=(params,))
 
-        # Create an ImageMobject with the image
-        fox_img_dot = Dot().move_to([-1,0,0])
-        rab_img_dot = Dot().move_to([1,0,0])
-        fox_img = ImageMobject(fox_path)
-        rab_img = ImageMobject(rab_path)
-        foxrab_img = ImageMobject(foxrab_path)
+        axes = Axes(x_range=[0,12,1],
+                    y_range=[0,5,1])
+        axes2 = Axes(x_range=[0,12,1],
+                     y_range=[0,5,1])
+        line = Line()
+        prey = axes.plot_line_graph(x_values=t, y_values=y[:,0], add_vertex_dots=False, line_color=BLUE_D)
+        predator = axes2.plot_line_graph(x_values=t, y_values=y[:,1], add_vertex_dots=False, line_color=MAROON_D)
 
-        # Set the position and scale of the image
-        fox_img.scale(1.5).align_to(fox_img_dot, RIGHT)
-        rab_img.scale(1.5).align_to(rab_img_dot, LEFT)
-        crossos = Cross(color=MAROON_D, stroke_width=20, scale_factor=.2)
-        foxrab_img.scale(1.8).move_to([0,-1,0])
 
-        self.play(FadeIn(fox_img))
-        self.play(Write(crossos))
-        self.play(FadeIn(rab_img))
-        self.play(fox_img.animate.shift(UP), rab_img.animate.shift(UP), crossos.animate.shift(UP))
-        self.play(FadeIn(foxrab_img))
-        self.wait(1)
-
+        self.add(axes)
+        self.play(Create(prey), Create(predator), run_time=3, rate_func=linear)
 
 
