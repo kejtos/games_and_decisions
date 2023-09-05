@@ -31,25 +31,28 @@ def predator_prey(vars, t, params):
 
 y = odeint(predator_prey, vars_0, t, args=(params,))
 
-f,ax = plt.subplots(1)
-line1, = ax.plot(t, y[:,0], 'b-')
-line2, = ax.plot(t, y[:,1], 'r-')
-plt.show()
+fig, axs = plt.subplots(2,2, gridspec_kw=dict(width_ratios=[1, 3], wspace=0), facecolor='none')
+fig.patch.set_alpha(0)
 
+for i, ax in enumerate(axs.flat):
+    ax.set_facecolor('none')  # Set the axes background to transparent
+    ax.xaxis.set_ticks([])  # Remove x-axis ticks
+    ax.yaxis.set_ticks([])  # Remove y-axis ticks
+    if i % 2 == 0:
+        ax.spines[['top', 'right', 'bottom', 'left']].set_color('white')  # Set axes color to white
 
-fig,axs = plt.subplots(2,2, gridspec_kw=dict(width_ratios=[1, 3], wspace=0))
-axs[0,1].set_yticklabels([])
-axs[0,1].set_yticks([])
-axs[0,0].set_xticklabels([])
-axs[0,0].set_xticks([])
-axs[1,0].set_xticklabels([])
-axs[1,0].set_xticks([])
-axs[1,1].set_yticklabels([])
-axs[1,1].set_yticks([])
-axs[0,0].set_yticklabels([])
-axs[0,0].set_yticks([])
-axs[1,0].set_yticklabels([])
-axs[1,0].set_yticks([])
+# axs[0,1].set_yticklabels([])
+# axs[0,1].set_yticks([])
+# axs[0,0].set_xticklabels([])
+# axs[0,0].set_xticks([])
+# axs[1,0].set_xticklabels([])
+# axs[1,0].set_xticks([])
+# axs[1,1].set_yticklabels([])
+# axs[1,1].set_yticks([])
+# axs[0,0].set_yticklabels([])
+# axs[0,0].set_yticks([])
+# axs[1,0].set_yticklabels([])
+# axs[1,0].set_yticks([])
 
 axs[0,1].set_xlim(0,10)
 axs[0,1].set_ylim(0,5)
@@ -57,11 +60,11 @@ axs[0,1].set_ylim(0,5)
 axs[1,1].set_xlim(0,10)
 axs[1,1].set_ylim(0,5)
 
-l1, = axs[0,1].plot([], [], 'b-')
-l2, = axs[1,1].plot([], [], 'r-')
+l1, = axs[0,1].plot([], [], '#29ABCA')
+l2, = axs[1,1].plot([], [], '#94424F')
 
-img_rab = plt.imread('rabbit.png')
-img_fox = plt.imread('fox.png')
+img_rab = plt.imread(r'biology\rabbit_black.png')
+img_fox = plt.imread(r'biology\fox_black.png')
 
 n = 20
 sigma = 0.001
@@ -86,12 +89,10 @@ for i in range(n,2*n):
 axs[0,0].axis('off')
 axs[1,0].axis('off')
 
-# plt.show()
-
 xlist = []
 ylist1 = []
 ylist2 = []
-con = ConnectionPatch((0, 1), (0, 2), "data", "data", axesA=axs[0,1], axesB=axs[1,1], color="C0", ls="dotted")
+con = ConnectionPatch((0, 1), (0, 2), 'data', 'data', axesA=axs[0,1], axesB=axs[1,1], color='#76DDC0', ls='dotted')
 fig.add_artist(con)
 
 gran = 10
@@ -129,5 +130,5 @@ def animate(i):
 
     return l1,l2,con,
 
-ani = FuncAnimation(fig, animate, repeat=False, blit=False, interval=1, frames=len(t)//gran)
-ani.save('predator-pray.gif', PillowWriter(fps=30))
+ani = FuncAnimation(fig, animate, repeat=False, blit=False, interval=1, frames=5)#len(t)//gran)
+ani.save('predator-pray_upgrade.gif', PillowWriter(fps=30))
