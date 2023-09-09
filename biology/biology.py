@@ -8,6 +8,7 @@ import numpy as np
 from numpy import random
 from scipy.integrate import odeint
 import pylab as p
+from scipy.interpolate import interp1d
 
 X_MOVE = 5.5
 Y_MOVE = 2
@@ -261,7 +262,7 @@ class GTtable(VGroup): # zatim fixed, v budoucnu zmenit velikost v zavislosti na
         self.all_payoffs[row][col][pos] = new_payoff.move_to(self.all_payoffs[row][col][pos])
 
 
-class CreateHD(Scene):
+class Biology(Scene):
     def construct(self):
         conds = ([r'V > C'],
                  [r'V < C'],
@@ -548,6 +549,27 @@ class CreateHD(Scene):
 
 class Main(Scene):
     def construct(self):
+        predator_prey_heading = Text('Predator-pray', font_size=FONT_SIZE_HEADINGS).to_edge(UL)
+
+        pp_conds = [['x', 'y', 't', r'{dx \over dt}', r'{dy \over dt}', r'\alpha', r'\beta', r'\gamma', r'\delta'],
+                    [r'\text{--- number of rabbits per square km}', r'\text{--- number of foxes per square km}', r'\text{--- time}', r'\text{--- growth rate of rabbits}', r'\text{--- growth rate of rabbits}',
+                     r'\text{--- maximum growth rate of rabbits}', r'\text{--- effect of foxes on the growth rate of rabbits}', r'\text{--- effect of rabbits on the growth rate of foxes}', r'\text{--- death rate of foxes}']]
+
+        pp_conds_mtex = []
+        pp_conds_mtex.append((MathTex(pp_conds[0][0], font_size=FONT_SIZE_PREDATOR_PREY).move_to([1, 2, 0]),
+                              MathTex(pp_conds[1][0], font_size=FONT_SIZE_PREDATOR_PREY)))
+        pp_conds_mtex[0][1].next_to(pp_conds_mtex[0][0].get_center(), RIGHT)
+
+        for i, _ in enumerate(pp_conds[0][1:], 1):
+            if isinstance(pp_conds[0][i], list):
+                pp_conds_mtex.append((MathTex(*pp_conds[0][i], font_size=FONT_SIZE_PREDATOR_PREY).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
+                                      MathTex(pp_conds[1][i], font_size=FONT_SIZE_PREDATOR_PREY)))
+                pp_conds_mtex[i][1].next_to(pp_conds_mtex[i][0].get_center(), RIGHT)
+            else:
+                pp_conds_mtex.append((MathTex(pp_conds[0][i], font_size=FONT_SIZE_PREDATOR_PREY).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
+                                      MathTex(pp_conds[1][i], font_size=FONT_SIZE_PREDATOR_PREY)))
+                pp_conds_mtex[i][1].next_to(pp_conds_mtex[i][0].get_center(), RIGHT)
+
         t = np.linspace(0, 10, num=10000)
         a = 1.5
         b = 1.5
@@ -556,17 +578,52 @@ class Main(Scene):
         vars_0 = [1, 2]
         params = [a, b, c, d]
         y = odeint(predator_prey, vars_0, t, args=(params,))
+        xpos = ValueTracker(0)
 
-        axes = Axes(x_range=[0,12,1],
-                    y_range=[0,5,1])
-        axes2 = Axes(x_range=[0,12,1],
-                     y_range=[0,5,1])
-        line = Line()
-        prey = axes.plot_line_graph(x_values=t, y_values=y[:,0], add_vertex_dots=False, line_color=BLUE_D)
-        predator = axes2.plot_line_graph(x_values=t, y_values=y[:,1], add_vertex_dots=False, line_color=MAROON_D)
+        prey_intpol = interp1d(t, y[:,0], kind='cubic')
+        predator_intpol = interp1d(t, y[:,1], kind='cubic')
+
+        ax = Axes(x_range=[0, 12, 1], y_range=[0, 5, 1], x_length=6, y_length=2, tips=False, x_axis_config={"include_ticks": False}, y_axis_config={"include_ticks": False})
+        ax.shift(4 * RIGHT + 1 * UP)
+        ax2 = Axes(x_range=[0, 12, 1], y_range=[0, 5, 1], x_length=6, y_length=2, tips=False, x_axis_config={"include_ticks": False}, y_axis_config={"include_ticks": False}).next_to(ax, DOWN)
+        
+        rabbits_eq = MathTex(r'{dx \over dt} = \alpha x - \beta xy').next_to(ax, LEFT).shift(LEFT)
+        foxes_eq = MathTex(r'{dy \over dt} = \gamma xy - \delta y').next_to(ax2, LEFT).align_to(rabbits_eq, LEFT)
+
+        rabbits = Text('Rabbits:', font_size=FONT_SIZE_GENERAL).next_to(rabbits_eq, LEFT).shift(0.5*LEFT)
+        foxes = Text('Foxes:', font_size=FONT_SIZE_GENERAL).next_to(foxes_eq, LEFT).align_to(rabbits, RIGHT)
+
+        prey = always_redraw(lambda: ax.plot(prey_intpol, x_range=[0, xpos.get_value(), 0.01], color=BLUE_D))
+        predator = always_redraw(lambda: ax2.plot(predator_intpol, x_range=[0, xpos.get_value(), 0.01], color=MAROON_D))
+
+        line = DashedLine(start=ax.coords_to_point(xpos.get_value(), prey_intpol(xpos.get_value()), -0.01), end=ax2.coords_to_point(xpos.get_value(), predator_intpol(xpos.get_value()), -0.01), color=TEAL_B, dashed_ratio=0.3)
+        line.add_updater(lambda m: m.put_start_and_end_on(ax.c2p(xpos.get_value(), prey_intpol(xpos.get_value()), -0.01), ax2.c2p(xpos.get_value(), predator_intpol(xpos.get_value()), -0.01)))
+
+        self.play(Write(predator_prey_heading))
+        # self.foreground_mobjects
+        
+        for textos, textos2 in pp_conds_mtex:
+            self.play(Create(VGroup(textos, textos2)))
 
 
-        self.add(axes)
-        self.play(Create(prey), Create(predator), run_time=3, rate_func=linear)
+        self.play(FadeIn(rabbits))
+        self.play(FadeIn(rabbits_eq))
+        
+        self.play(FadeIn(foxes))
+        self.play(FadeIn(foxes_eq))
+        self.play(*[FadeOut(VGroup(line1, line2)) for line1, line2 in pp_conds_mtex])
+
+        self.play(FadeIn(ax),FadeIn(ax2))
+        xpos = ValueTracker(0)
+        self.add(prey, predator, line)
+
+        value = DecimalNumber(0).scale(0.6)
+        def valueUpdater(mobj):
+            mobj.next_to(dot,UP).set_value(func(xpos.get_value()))
+            
+        value.add_updater(valueUpdater)
 
 
+        self.wait()
+        self.play(xpos.animate.set_value(10), run_time=3, rate_func=rate_functions.linear)
+        self.wait()
