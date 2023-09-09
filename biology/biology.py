@@ -578,7 +578,10 @@ class Main(Scene):
         vars_0 = [1, 2]
         params = [a, b, c, d]
         y = odeint(predator_prey, vars_0, t, args=(params,))
+
         xpos = ValueTracker(0)
+        n_rabbits = Integer(100).scale(0.75)
+        n_foxes = Integer(200).scale(0.75)
 
         prey_intpol = interp1d(t, y[:,0], kind='cubic')
         predator_intpol = interp1d(t, y[:,1], kind='cubic')
@@ -596,15 +599,23 @@ class Main(Scene):
         prey = always_redraw(lambda: ax.plot(prey_intpol, x_range=[0, xpos.get_value(), 0.01], color=BLUE_D))
         predator = always_redraw(lambda: ax2.plot(predator_intpol, x_range=[0, xpos.get_value(), 0.01], color=MAROON_D))
 
-        line = DashedLine(start=ax.coords_to_point(xpos.get_value(), prey_intpol(xpos.get_value()), -0.01), end=ax2.coords_to_point(xpos.get_value(), predator_intpol(xpos.get_value()), -0.01), color=TEAL_B, dashed_ratio=0.3)
-        line.add_updater(lambda m: m.put_start_and_end_on(ax.c2p(xpos.get_value(), prey_intpol(xpos.get_value()), -0.01), ax2.c2p(xpos.get_value(), predator_intpol(xpos.get_value()), -0.01)))
+        line = DashedLine(start=ax.coords_to_point(xpos.get_value(), prey_intpol(xpos.get_value()), -0.1), end=ax2.coords_to_point(xpos.get_value(), predator_intpol(xpos.get_value()), -0.01), color=TEAL_B, dashed_ratio=0.3)
+        line.add_updater(lambda m: m.put_start_and_end_on(ax.c2p(xpos.get_value(), prey_intpol(xpos.get_value()), -0.1), ax2.c2p(xpos.get_value(), predator_intpol(xpos.get_value()), -0.01)))
+
+        def rabbit_updater(mobj):
+            mobj.next_to(ax.c2p(xpos.get_value(), prey_intpol(xpos.get_value())), UR).set_value(prey_intpol(xpos.get_value())*100)
+
+        def fox_updater(mobj):
+            mobj.next_to(ax2.c2p(xpos.get_value(), predator_intpol(xpos.get_value())), UR).set_value(predator_intpol(xpos.get_value())*100)
+
+        n_rabbits.add_updater(rabbit_updater)
+        n_foxes.add_updater(fox_updater)
 
         self.play(Write(predator_prey_heading))
         # self.foreground_mobjects
         
         for textos, textos2 in pp_conds_mtex:
             self.play(Create(VGroup(textos, textos2)))
-
 
         self.play(FadeIn(rabbits))
         self.play(FadeIn(rabbits_eq))
@@ -617,13 +628,7 @@ class Main(Scene):
         xpos = ValueTracker(0)
         self.add(prey, predator, line)
 
-        value = DecimalNumber(0).scale(0.6)
-        def valueUpdater(mobj):
-            mobj.next_to(dot,UP).set_value(func(xpos.get_value()))
-            
-        value.add_updater(valueUpdater)
 
-
-        self.wait()
+        self.play(FadeIn(n_rabbits),FadeIn(n_foxes))
         self.play(xpos.animate.set_value(10), run_time=3, rate_func=rate_functions.linear)
         self.wait()
