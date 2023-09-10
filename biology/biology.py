@@ -10,6 +10,9 @@ from scipy.integrate import odeint
 import pylab as p
 from scipy.interpolate import interp1d
 
+custom_tex_template = TexTemplate(documentclass=r"\documentclass[preview, varwidth=2000px]{standalone}")
+MathTex.set_default(tex_template=custom_tex_template)
+
 X_MOVE = 5.5
 Y_MOVE = 2
 PAUSE = 1
@@ -28,12 +31,13 @@ DECS = (2, 0, 0, 2, 0)
 DEF_COL = BLUE_D
 TABLE_WIDTH = 10.0
 TABLE_HEIGHT = 5.0
-FONT_SIZE_PREDATOR_PREY = 26
-FONT_SIZE_HAWK_DOVE = 30
-FONT_SIZE_GENERAL = 36
-FONT_SIZE_HEADINGS = 36
+FONT_SIZE_PREDATOR_PREY = 28
+FONT_SIZE_HAWK_DOVE = 36
+FONT_SIZE_GENERAL = 42
+FONT_SIZE_HEADINGS = 50
 MAIN_COLOR = BLUE_D
-FONT_BULLETS = 18
+FONT_BULLETS = 30
+FONT_SIZE_AXES = 24
 
 
 def predator_prey(vars, t, params):
@@ -288,6 +292,7 @@ class Biology(Scene):
         recall_prisoners_dilemma = Text('Let\'s recall prisoner\'s dilemma.')
 
         text_below_table = Text('Once again, Prisoner\'s dilemma is \"a reason why we can\'t have nice things.\"', font_size=28, color=WHITE).next_to(table_1.frame.get_bottom(), DOWN).shift(DOWN)
+        texts_target_for_future = text_below_table.get_center()
 
         self.play(Write(recall_prisoners_dilemma))
         self.play(FadeOut(recall_prisoners_dilemma))
@@ -314,17 +319,17 @@ class Biology(Scene):
         line_1 = Line(start=[-0.5,1,0], end=[-5.5,1,0], stroke_width=0.8)
         line_2 = Line(start=[0.5,1,0], end=[5.5,1,0], stroke_width=0.8)
         line_3 = Line(start=[0,0.9,0], end=[0,-3.5,0], stroke_width=0.8)
-        cooperation_and_altruism = Text('Cooperation and altruism', font_size=FONT_SIZE_HEADINGS).to_edge(UL)
-        why_coop = Text('Why would animals cooperate? How could altruism survive?', font_size=28).move_to([0,1.8,0])
+        cooperation_and_altruism = Tex('Cooperation and altruism', font_size=FONT_SIZE_HEADINGS).to_edge(UL)
+        why_coop = Tex('Why would animals cooperate? How could altruism survive?', font_size=40).move_to([0,1.8,0])
         
-        group_sel = Text('Group selection', font_size=24, weight=BOLD).next_to(line_1, 2*DOWN)#.align_to(line_1, RIGHT).shift(LEFT)
-        self_gene = Text('Selfish gene', font_size=24, weight=BOLD).next_to(line_2, 2*DOWN)#.align_to(line_2, LEFT).shift(RIGHT)
+        group_sel = Tex(r'\textbf{Group selection}', font_size=36).next_to(line_1, 2*DOWN)#.align_to(line_1, RIGHT).shift(LEFT)
+        self_gene = Tex(r'\textbf{Selfish gene}', font_size=36).next_to(line_2, 2*DOWN)#.align_to(line_2, LEFT).shift(RIGHT)
         
-        gs_b1 = Text('Individuals do it for the good of the group', font_size=FONT_BULLETS).next_to(group_sel, 3*DOWN)
-        gs_b2 = Text('Minority view', font_size=FONT_BULLETS).next_to(gs_b1, 3*DOWN).align_to(gs_b1, LEFT).set_color(MAROON_D)
+        gs_b1 = Tex('Individuals do it for the good of the group', font_size=FONT_BULLETS).next_to(group_sel, 3*DOWN)
+        gs_b2 = Tex('Minority view', font_size=FONT_BULLETS).next_to(gs_b1, 3*DOWN).set_color(MAROON_D)
 
-        sg_b1 = Text('Sharing strategy may be self-serving', font_size=FONT_BULLETS).next_to(self_gene, 3*DOWN)
-        sg_b2 = Text('Majority view', font_size=FONT_BULLETS).next_to(sg_b1, 3*DOWN).align_to(sg_b1, LEFT).set_color(GREEN_C)
+        sg_b1 = Tex('Sharing strategy may be self-serving', font_size=FONT_BULLETS).next_to(self_gene, 3*DOWN)
+        sg_b2 = Tex('Majority view', font_size=FONT_BULLETS).next_to(sg_b1, 3*DOWN).set_color(GREEN_C)
 
 
         self.play(Write(cooperation_and_altruism))
@@ -345,14 +350,14 @@ class Biology(Scene):
                 r'HV - HC &= -DV\\',
                 r'HV - HC &= -(1-H)V\\',
                 r'HV - HC &= HV - V\\',
-                r'-HC &= -V\\',
+                r'- HC &= -V\\',
                 r'HC &= V\\',
                 r'H &= {V \over C}\\',
                 font_size=FONT_SIZE_HAWK_DOVE).to_edge(UL)
         for eq in eqs: index_labels(eq)
 
         hawk_fight = MathTex(r'{V \over 2} - {C \over 2}')
-        hawk_share = MathTex('{{V}}')
+        hawk_share = MathTex('V')
         dove_fight = MathTex('0')
         dove_share = MathTex(r'{V \over 2}')
 
@@ -368,10 +373,10 @@ class Biology(Scene):
                     border_col = BLUE_D,
                     header_font_size = 30).shift(UP)
 
-        value = MathTex('{{V}}')
-        cost = MathTex('{{C}}')
-        hawks = MathTex('{{H}}')
-        doves = MathTex('{{D}}')
+        value = MathTex('V')
+        cost = MathTex('C')
+        hawks = MathTex('H')
+        doves = MathTex('D')
         value_desc = MathTex(r'\text{--- Value or payoff}', font_size=FONT_SIZE_GENERAL)
         cost_desc = MathTex(r'\text{--- Cost}', font_size=FONT_SIZE_GENERAL)
         hawks_desc = MathTex(r'\text{--- Proportion of hawks}', font_size=FONT_SIZE_GENERAL)
@@ -421,45 +426,56 @@ class Biology(Scene):
 # 1st eq
         self.play(Write(eqs[0]))
 # 2nd eq
+        copy_0_0 = table_2.get_payoffs(0,0,0).copy()
+        copy_0_1 = table_2.get_payoffs(0,1,0).copy()
+        copy_1_0 = table_2.get_payoffs(1,0,0).copy()
+        copy_1_1 = table_2.get_payoffs(1,1,0).copy()
+        h_copy = hawks.copy()
+        d_copy = doves.copy()
+        d_copy2 = doves.copy()
         self.play(FadeIn(eqs[1][13]))
-        self.play(Indicate(hawks[0]))
-        self.play(hawks[0].copy().animate.move_to(eqs[1][0]))
+        self.play(Indicate(hawks))
+        self.play(h_copy.animate.move_to(eqs[1][0]).match_width(eqs[1][0]))
         self.play(Indicate(table_2.get_payoffs(0,0,0)))
-        self.play(FadeIn(eqs[1][1]), FadeIn(eqs[1][9]), table_2.get_payoffs(0,0,0).copy().animate.move_to(eqs[1][2:9]))
+        self.play(FadeIn(eqs[1][1]), FadeIn(eqs[1][9]), copy_0_0.animate.move_to(eqs[1][2:9]).match_width(eqs[1][2:9]))
         self.play(FadeIn(eqs[1][10]))
         self.play(Indicate(doves))
-        self.play(doves.copy().animate.move_to(eqs[1][11]))
+        self.play(d_copy.animate.move_to(eqs[1][11]).match_width(eqs[1][11]))
         self.play(Indicate(table_2.get_payoffs(0,1,0)))
-        self.play(table_2.get_payoffs(0,1,0).copy().animate.move_to(eqs[1][12]))
+        self.play(copy_0_1.animate.move_to(eqs[1][12]).match_width(eqs[1][12]))
         self.play(Indicate(table_2.get_payoffs(1,0,0)))
-        self.play(table_2.get_payoffs(1,0,0).copy().animate.move_to(eqs[1][14]))
+        self.play(copy_1_0.animate.move_to(eqs[1][14]).match_width(eqs[1][14]))
         self.play(FadeIn(eqs[1][15]))
         self.play(Indicate(doves))
-        self.play(doves.copy().animate.move_to(eqs[1][16]))
+        self.play(d_copy2.animate.move_to(eqs[1][16]).match_width(eqs[1][16]))
         self.play(Indicate(table_2.get_payoffs(1,1,0)))
-        self.play(table_2.get_payoffs(1,1,0).copy().animate.move_to(eqs[1][17:20]))
+        self.play(copy_1_1.animate.move_to(eqs[1][17:20]).match_width(eqs[1][17:20]))
 # 3rd eq
+        eqs1_copy = eqs[1].copy()
+        eqs1_copy2 = eqs[1].copy()
         self.play(FadeIn(eqs[2][9]))
-        self.play(eqs[1][0].copy().animate.move_to(eqs[2][0]),
-                  eqs[1][2].copy().animate.move_to(eqs[2][1]),
-                  eqs[1][5].copy().animate.move_to(eqs[2][2]),
-                  eqs[1][0].copy().animate.move_to(eqs[2][3]),
-                  eqs[1][6].copy().animate.move_to(eqs[2][4]))
-        self.play(eqs[1][10].copy().animate.move_to(eqs[2][5]),
+        self.play(eqs1_copy[0].animate.move_to(eqs[2][0]),
+                  eqs1_copy[2].animate.move_to(eqs[2][1]),
+                  eqs1_copy[5].animate.move_to(eqs[2][2]),
+                  eqs1_copy2[0].animate.move_to(eqs[2][3]),
+                  eqs1_copy[6].animate.move_to(eqs[2][4]))
+        self.play(eqs1_copy[10].animate.move_to(eqs[2][5]),
                   FadeIn(eqs[2][6]),
-                  eqs[1][11].copy().animate.move_to(eqs[2][7]),
-                  eqs[1][12].copy().animate.move_to(eqs[2][8]))
-        self.play(eqs[1][16].copy().animate.move_to(eqs[2][10]),
-                  eqs[1][17].copy().animate.move_to(eqs[2][11]))
+                  eqs1_copy[11].animate.move_to(eqs[2][7]),
+                  eqs1_copy[12].animate.move_to(eqs[2][8]))
+        self.play(eqs1_copy[16].animate.move_to(eqs[2][10]),
+                  eqs1_copy[17].animate.move_to(eqs[2][11]))
 # 4th eq
         self.play(FadeIn(eqs[3][5]))
         self.play(eqs[2][0:5].animate.move_to(eqs[3][0:5]))
         self.play(FadeIn(eqs[3][6]), eqs[2][10:12].animate.move_to(eqs[3][7:9]))
 # 5th eq
+        copy_3_6 = eqs[3][6].copy()
+        copy_3_7 = eqs[3][7].copy()
         self.play(FadeIn(eqs[4][5]))
         self.play(eqs[3][0:5].animate.move_to(eqs[4][0:5]))
-        self.play(eqs[3][6].copy().animate.move_to(eqs[4][6]),
-                  FadeIn(eqs[4][7]), FadeIn(eqs[4][11]), Transform(eqs[3][7].copy(), eqs[4][8:11]),
+        self.play(copy_3_6.animate.move_to(eqs[4][6]),
+                  FadeIn(eqs[4][7]), FadeIn(eqs[4][11]), Transform(copy_3_7, eqs[4][8:11]),
                   eqs[3][8].animate.move_to(eqs[4][12]))
 # 6th eq
         self.play(FadeIn(eqs[5][5]))
@@ -472,18 +488,51 @@ class Biology(Scene):
 # 7th eq
         self.play(FadeIn(eqs[6][3]))
         self.play(eqs[5][2:5].animate.move_to(eqs[6][0:3]))
-        self.play(eqs[5][6:8].animate.move_to(eqs[6][4:6]))
+        self.play(eqs[5][8:10].animate.move_to(eqs[6][4:6]))
 # 8th eq
         self.play(FadeIn(eqs[7][2]))
         self.play(eqs[6][1:3].animate.move_to(eqs[7][0:2]))
         self.play(eqs[6][5].animate.move_to(eqs[7][3]))
 # 9th eq
+        copy_7_2 = eqs[7][2].copy()
         self.play(eqs[7][0].animate.move_to(eqs[8][0]),
-                  eqs[7][2].copy().animate.move_to(eqs[8][1]),
+                  copy_7_2.animate.move_to(eqs[8][1]),
                   eqs[7][3].animate.move_to(eqs[8][2]),
                   FadeIn(eqs[8][3]),
                   eqs[7][1].animate.move_to(eqs[8][4]))
+        
+        self.add(eqs[8])
+        
+        conds = MathTex(r'V &> C \implies H = 1,\quad{} D = 0 \\',
+                        r'V &< C \implies H < 1,\quad{} D > 0 \\', font_size=FONT_SIZE_HAWK_DOVE)
+        conds2 = MathTex(r'H &> \frac{V}{C},\quad{} \text{playing Dove yields higher EV} \\',
+                         r'H &< \frac{V}{C},\quad{} \text{playing Hawk yields higher EV} \\', font_size=FONT_SIZE_HAWK_DOVE)
+        conclusion_h_d = Tex('Playing Dove can be a viable strategy. Individuals might be sharers for their own benefit.')
+        
+        index_labels(conds)
+        conds.next_to(eqs[8][3], 3*RIGHT)
+        conds[0].shift(0.2*UP)
+        conds[1].shift(0.2*DOWN)
+        brace = BraceBetweenPoints(conds.get_top(), conds.get_bottom()).next_to(conds, 0.8*LEFT)
+        resulting_conditions = VGroup(eqs[8], brace, conds)
+        self.play(GrowFromCenter(brace))
+        self.play(Write(conds[0]))
+        self.play(Write(conds[1]))
+        self.play(FadeOut(eqs[0:8]), *[FadeOut(mob) for mob in [copy_0_0, copy_1_0, copy_0_1, copy_1_1, eqs1_copy, h_copy, d_copy, copy_3_6, copy_7_2, d_copy2, copy_3_7, eqs1_copy2]])
+        self.play(resulting_conditions.animate.to_edge(UL).shift(DOWN))
 
+        v_leq_c = conds[1][0:3].copy()
+
+        brace2 = BraceBetweenPoints(conds2.get_top(), conds2.get_bottom()).next_to(brace, 6*DOWN)
+        conds2[0].next_to(brace2, RIGHT).align_to(brace2, UP)
+        conds2[1].next_to(brace2, RIGHT).next_to(conds2[0], DOWN)
+        brace_copy = brace.copy()
+        conclusion_h_d.move_to(texts_target_for_future)
+        self.play(Transform(brace_copy, brace2), v_leq_c.animate.next_to(brace2, LEFT))
+        self.play(Write(conds2[0]))
+        self.play(Write(conds2[1]))
+        self.play(Write(conclusion_h_d))
+        self.play(*[FadeOut(mob) for mob in [ext_table, resulting_conditions, v_leq_c, brace2, brace_copy, conds2, conclusion_h_d]])
 ## Predator-Prey introduction
         fox_path = r"C:\Users\Honzík\OneDrive - Vysoká škola ekonomická v Praze\Connection\Plocha\Ucení\Game theory\biology\fox.png"
         rab_path = r"C:\Users\Honzík\OneDrive - Vysoká škola ekonomická v Praze\Connection\Plocha\Ucení\Game theory\biology\rabbit.png"
@@ -507,49 +556,9 @@ class Biology(Scene):
         self.play(FadeIn(rab_img))
         self.play(fox_img.animate.shift(UP), rab_img.animate.shift(UP), crossos.animate.shift(UP))
         self.play(FadeIn(foxrab_img))
+        self.play(*[FadeOut(mob)for mob in [fox_img, rab_img, foxrab_img, crossos]])
 ## Predator-Prey
-        rabbits = Text('Rabbits:', font_size=FONT_SIZE_GENERAL).move_to([-5,2,0])
-        rabbits_eq = MathTex(r'{dx \over dt} = \alpha x - \beta xy').next_to(rabbits, RIGHT)
-        foxes = Text('Foxes:', font_size=FONT_SIZE_GENERAL).next_to(rabbits, DOWN).shift(DOWN)
-        foxes_eq = MathTex(r'{dy \over dt} = \gamma xy - \delta y').align_to(rabbits_eq, LEFT).next_to(rabbits_eq, DOWN)
-
-        pp_conds = [['x', 'y', 't', r'{dx \over dt}', r'{dy \over dt}', r'\alpha', r'\beta', r'\gamma', r'\delta'],
-                    [r'\text{--- number of rabbits per square km}', r'\text{--- number of foxes per square km}', r'\text{--- time}', r'\text{--- growth rate of rabbits}', r'\text{--- growth rate of rabbits}',
-                     r'\text{--- maximum growth rate of rabbits}', r'\text{--- effect of foxes on the growth rate of rabbits}', r'\text{--- effect of rabbits on the growth rate of foxes}', r'\text{--- death rate of foxes}']]
-
-        pp_conds_mtex = []
-        pp_conds_mtex.append((MathTex(pp_conds[0][0], font_size=FONT_SIZE_PREDATOR_PREY).move_to([0, 3, 0]),
-                              MathTex(pp_conds[1][0], font_size=FONT_SIZE_PREDATOR_PREY)))
-        pp_conds_mtex[0][1].next_to(pp_conds_mtex[0][0].get_center(), RIGHT)
-
-        for i, _ in enumerate(pp_conds[0][1:], 1):
-            if isinstance(pp_conds[0][i], list):
-                pp_conds_mtex.append((MathTex(*pp_conds[0][i], font_size=FONT_SIZE_PREDATOR_PREY).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
-                                      MathTex(pp_conds[1][i], font_size=FONT_SIZE_PREDATOR_PREY)))
-                pp_conds_mtex[i][1].next_to(pp_conds_mtex[i][0].get_center(), RIGHT)
-            else:
-                pp_conds_mtex.append((MathTex(pp_conds[0][i], font_size=FONT_SIZE_PREDATOR_PREY).align_to(pp_conds_mtex[i-1][0], LEFT).next_to(pp_conds_mtex[i-1][0], DOWN),
-                                      MathTex(pp_conds[1][i], font_size=FONT_SIZE_PREDATOR_PREY)))
-                pp_conds_mtex[i][1].next_to(pp_conds_mtex[i][0].get_center(), RIGHT)
-
-        self.play(*[FadeOut(mob) for mob in self.mobjects])
-        # self.foreground_mobjects
-        
-        for textos, textos2 in pp_conds_mtex:
-            self.play(Create(VGroup(textos, textos2)))
-
-        self.play(FadeIn(rabbits))
-        self.play(FadeIn(rabbits_eq))
-        
-        self.play(FadeIn(foxes))
-        self.play(FadeIn(foxes_eq))
-
-        self.wait(PAUSE)
-
-
-class Main(Scene):
-    def construct(self):
-        predator_prey_heading = Text('Predator-pray', font_size=FONT_SIZE_HEADINGS).to_edge(UL)
+        predator_prey_heading = Tex('Predator-pray', font_size=FONT_SIZE_HEADINGS).to_edge(UL)
 
         pp_conds = [['x', 'y', 't', r'{dx \over dt}', r'{dy \over dt}', r'\alpha', r'\beta', r'\gamma', r'\delta'],
                     [r'\text{--- number of rabbits per square km}', r'\text{--- number of foxes per square km}', r'\text{--- time}', r'\text{--- growth rate of rabbits}', r'\text{--- growth rate of rabbits}',
@@ -589,19 +598,28 @@ class Main(Scene):
         ax = Axes(x_range=[0, 12, 1], y_range=[0, 5, 1], x_length=6, y_length=2, tips=False, x_axis_config={"include_ticks": False}, y_axis_config={"include_ticks": False})
         ax.shift(4 * RIGHT + 1 * UP)
         ax2 = Axes(x_range=[0, 12, 1], y_range=[0, 5, 1], x_length=6, y_length=2, tips=False, x_axis_config={"include_ticks": False}, y_axis_config={"include_ticks": False}).next_to(ax, DOWN)
-        FONT_SIZE_AXES = 20
-        time = Text('Time', font_size=FONT_SIZE_AXES).next_to(ax2, DOWN)
-        rabbit_y = Text('Number of rabbits', font_size=FONT_SIZE_AXES).rotate(90)***
-        fox_y = Text('Number of foxes', font_size=FONT_SIZE_AXES).rotate(90)***
+        time = Tex('Time', font_size=FONT_SIZE_AXES).next_to(ax2, DOWN)
+        rabbit_y = Tex('Number of rabbits', font_size=FONT_SIZE_AXES).rotate(90*DEGREES)
+        fox_y = Tex('Number of foxes', font_size=FONT_SIZE_AXES).rotate(90*DEGREES)
         
         rabbit_y.next_to(ax, LEFT)
         fox_y.next_to(ax2, LEFT)
         
-        rabbits_eq = MathTex(r'{dx \over dt} = \alpha x - \beta xy').next_to(ax, LEFT).shift(LEFT)
-        foxes_eq = MathTex(r'{dy \over dt} = \gamma xy - \delta y').next_to(ax2, LEFT).align_to(rabbits_eq, LEFT)
+        p_p_eq = Tex(r'2 equilibria exists:',
+                     r'1) $x=0$ and $y=0$, both extinct',
+                     r'2) $x=\frac{\delta}{\gamma}$ and $y=\frac{\alpha}{\beta}$, population of rabbits depends on parameters of foxes and vice versa',
+                     r'But eq. 2) is unstable $\implies$ any disturbance leads to oscillation', font_size=FONT_SIZE_PREDATOR_PREY)
 
-        rabbits = Text('Rabbits:', font_size=FONT_SIZE_GENERAL).next_to(rabbits_eq, LEFT).shift(0.5*LEFT)
-        foxes = Text('Foxes:', font_size=FONT_SIZE_GENERAL).next_to(foxes_eq, LEFT).align_to(rabbits, RIGHT)
+        p_p_eq[3].to_edge(DL)
+        p_p_eq[2].next_to(p_p_eq[3], 1.5*UP).align_to(p_p_eq[3] ,LEFT).shift(RIGHT)
+        p_p_eq[1].next_to(p_p_eq[2], UP).align_to(p_p_eq[2] ,LEFT)
+        p_p_eq[0].next_to(p_p_eq[1], 1.5*UP).align_to(p_p_eq[3] ,LEFT)
+
+        rabbits_eq = MathTex(r'{dx \over dt} = \alpha x - \beta xy').next_to(ax, LEFT).shift(LEFT)
+        foxes_eq = MathTex(r'{dy \over dt} = -\gamma y - \delta xy').next_to(ax2, LEFT).align_to(rabbits_eq, LEFT)
+
+        rabbits = Tex('Rabbits:', font_size=FONT_SIZE_GENERAL).next_to(rabbits_eq, LEFT).shift(0.5*LEFT)
+        foxes = Tex('Foxes:', font_size=FONT_SIZE_GENERAL).next_to(foxes_eq, LEFT).align_to(rabbits, RIGHT)
 
         prey = always_redraw(lambda: ax.plot(prey_intpol, x_range=[0, xpos.get_value(), 0.01], color=BLUE_D))
         predator = always_redraw(lambda: ax2.plot(predator_intpol, x_range=[0, xpos.get_value(), 0.01], color=MAROON_D))
@@ -619,10 +637,9 @@ class Main(Scene):
         n_foxes.add_updater(fox_updater)
 
         self.play(Write(predator_prey_heading))
-        # self.foreground_mobjects
-        
-        for textos, textos2 in pp_conds_mtex:
-            self.play(Create(VGroup(textos, textos2)))
+
+        for line1, line2 in pp_conds_mtex:
+            self.play(Create(VGroup(line1, line2)))
 
         self.play(FadeIn(rabbits))
         self.play(FadeIn(rabbits_eq))
@@ -634,9 +651,209 @@ class Main(Scene):
         self.play(FadeIn(ax),FadeIn(ax2))
         self.play(FadeIn(time))
         self.play(FadeIn(rabbit_y), FadeIn(fox_y))
-        # self.add(prey, predator, line)
+        self.add(prey, predator, line)
 
 
-        # self.play(FadeIn(n_rabbits),FadeIn(n_foxes))
-        # self.play(xpos.animate.set_value(10), run_time=3, rate_func=rate_functions.linear)
-        # self.wait()
+        self.play(FadeIn(n_rabbits),FadeIn(n_foxes))
+        self.play(xpos.animate.set_value(10), run_time=30, rate_func=rate_functions.linear)
+        second_last_scene = VGroup(ax, ax2, n_rabbits, n_foxes, time, rabbit_y, fox_y, rabbits_eq, foxes_eq, rabbits, foxes)
+        self.play(second_last_scene.animate.shift(UP).scale(0.7))
+        for line in p_p_eq:
+            self.play(FadeIn(line))
+        self.wait()
+
+        self.wait(PAUSE)
+
+
+class Main(Scene):
+    def construct(self):
+        eqs = MathTex(r'EV_H &= EV_D\\',
+                r'H \big( {V \over 2} - {C \over 2} \big) + DV &= 0 + D {V \over 2}\\',
+                r'HV - HC + 2DV &= DV\\',
+                r'HV - HC &= -DV\\',
+                r'HV - HC &= -(1-H)V\\',
+                r'HV - HC &= HV - V\\',
+                r'- HC &= -V\\',
+                r'HC &= V\\',
+                r'H &= {V \over C}\\',
+                font_size=FONT_SIZE_HAWK_DOVE).to_edge(UL)
+        for eq in eqs: index_labels(eq)
+
+        hawk_fight = MathTex(r'{V \over 2} - {C \over 2}')
+        hawk_share = MathTex('V')
+        dove_fight = MathTex('0')
+        dove_share = MathTex(r'{V \over 2}')
+
+        table_2 = GTtable(table_strs=[[hawk_fight, hawk_share], [dove_fight, dove_share]],
+                    row_headers=['Hawk meets', 'Dove meets'],
+                    col_headers=['Hawk', 'Dove'],
+                    table_width = TABLE_WIDTH,
+                    table_height = TABLE_HEIGHT,
+                    n_rows = 2,
+                    n_cols = 2,
+                    payoff_col = WHITE,
+                    header_col = WHITE,
+                    border_col = BLUE_D,
+                    header_font_size = 30).shift(UP)
+
+        value = MathTex('V')
+        cost = MathTex('C')
+        hawks = MathTex('H')
+        doves = MathTex('D')
+        value_desc = MathTex(r'\text{--- Value or payoff}', font_size=FONT_SIZE_GENERAL)
+        cost_desc = MathTex(r'\text{--- Cost}', font_size=FONT_SIZE_GENERAL)
+        hawks_desc = MathTex(r'\text{--- Proportion of hawks}', font_size=FONT_SIZE_GENERAL)
+        doves_desc = MathTex(r'\text{--- Proportion of doves}', font_size=FONT_SIZE_GENERAL)
+        one_minus_hawks = MathTex('1 - H', font_size=FONT_SIZE_GENERAL)
+
+        value.next_to(table_2.frame, DOWN).align_to(table_2.frame, LEFT)
+        value_desc.next_to(value, RIGHT)
+        cost.next_to(value, DOWN)
+        cost_desc.next_to(cost, RIGHT)
+        hawks.next_to(value_desc, buff=1)
+        hawks_desc.next_to(hawks, RIGHT)
+        doves.next_to(hawks, DOWN)
+        doves_desc.next_to(doves)
+        ext_table = VGroup(table_2, value_desc, value, cost, cost_desc, hawks, hawks_desc, doves, doves_desc)
+
+        index_labels(table_2.get_payoffs(0,0,0)[0])
+
+        self.play(FadeIn(table_2.frame))
+
+        self.play(Write(table_2.get_row_headers(0)))
+        self.play(Write(table_2.get_row_headers(1)))
+        self.play(Write(table_2.get_col_headers(0)))
+        self.play(Write(table_2.get_col_headers(1)))
+
+        self.play(Write(VGroup(value, value_desc)))
+        self.play(Write(VGroup(cost, cost_desc)))
+        self.play(Write(VGroup(hawks, hawks_desc)))
+        self.play(Write(VGroup(doves, doves_desc)))
+
+        val_copy = value.copy()
+        cost_copy = cost.copy()
+        val_copy2 = value.copy()
+        cost_copy2 = cost.copy()
+        val_copy3 = value.copy()
+        
+        self.play(AnimationGroup(val_copy.animate.move_to(table_2.get_payoffs(0,0,0)[0][0]), FadeIn(table_2.get_payoffs(0,0,0)[0][1:3])))
+        self.play(cost_copy.animate.move_to(table_2.get_payoffs(0,0,0)[0][4]), FadeIn(table_2.get_payoffs(0,0,0)[0][3]), FadeIn(table_2.get_payoffs(0,0,0)[0][5:]))
+        self.play(val_copy2.animate.move_to(table_2.get_payoffs(0,1,0)[0][0]))
+        self.play(Create(table_2.get_payoffs(1,0,0)))
+        self.play(val_copy3.animate.move_to(table_2.get_payoffs(1,1,0)[0][0]), FadeIn(table_2.get_payoffs(1,1,0)[0][1:]))
+        self.add(table_2.get_payoffs(0,0,0), table_2.get_payoffs(0,1,0), table_2.get_payoffs(1,1,0))
+        self.remove(val_copy, cost_copy, val_copy2, cost_copy2, val_copy3)
+
+        self.play(ext_table.animate.scale(0.5).to_edge(UR))
+
+# 1st eq
+        self.play(Write(eqs[0]))
+# 2nd eq
+        copy_0_0 = table_2.get_payoffs(0,0,0).copy()
+        copy_0_1 = table_2.get_payoffs(0,1,0).copy()
+        copy_1_0 = table_2.get_payoffs(1,0,0).copy()
+        copy_1_1 = table_2.get_payoffs(1,1,0).copy()
+        h_copy = hawks.copy()
+        d_copy = doves.copy()
+        d_copy2 = doves.copy()
+        self.play(FadeIn(eqs[1][13]))
+        self.play(Indicate(hawks))
+        self.play(h_copy.animate.move_to(eqs[1][0]).match_width(eqs[1][0]))
+        self.play(Indicate(table_2.get_payoffs(0,0,0)))
+        self.play(FadeIn(eqs[1][1]), FadeIn(eqs[1][9]), copy_0_0.animate.move_to(eqs[1][2:9]).match_width(eqs[1][2:9]))
+        self.play(FadeIn(eqs[1][10]))
+        self.play(Indicate(doves))
+        self.play(d_copy.animate.move_to(eqs[1][11]).match_width(eqs[1][11]))
+        self.play(Indicate(table_2.get_payoffs(0,1,0)))
+        self.play(copy_0_1.animate.move_to(eqs[1][12]).match_width(eqs[1][12]))
+        self.play(Indicate(table_2.get_payoffs(1,0,0)))
+        self.play(copy_1_0.animate.move_to(eqs[1][14]).match_width(eqs[1][14]))
+        self.play(FadeIn(eqs[1][15]))
+        self.play(Indicate(doves))
+        self.play(d_copy2.animate.move_to(eqs[1][16]).match_width(eqs[1][16]))
+        self.play(Indicate(table_2.get_payoffs(1,1,0)))
+        self.play(copy_1_1.animate.move_to(eqs[1][17:20]).match_width(eqs[1][17:20]))
+# 3rd eq
+        eqs1_copy = eqs[1].copy()
+        eqs1_copy2 = eqs[1].copy()
+        self.play(FadeIn(eqs[2][9]))
+        self.play(eqs1_copy[0].animate.move_to(eqs[2][0]),
+                  eqs1_copy[2].animate.move_to(eqs[2][1]),
+                  eqs1_copy[5].animate.move_to(eqs[2][2]),
+                  eqs1_copy2[0].animate.move_to(eqs[2][3]),
+                  eqs1_copy[6].animate.move_to(eqs[2][4]))
+        self.play(eqs1_copy[10].animate.move_to(eqs[2][5]),
+                  FadeIn(eqs[2][6]),
+                  eqs1_copy[11].animate.move_to(eqs[2][7]),
+                  eqs1_copy[12].animate.move_to(eqs[2][8]))
+        self.play(eqs1_copy[16].animate.move_to(eqs[2][10]),
+                  eqs1_copy[17].animate.move_to(eqs[2][11]))
+# 4th eq
+        self.play(FadeIn(eqs[3][5]))
+        self.play(eqs[2][0:5].animate.move_to(eqs[3][0:5]))
+        self.play(FadeIn(eqs[3][6]), eqs[2][10:12].animate.move_to(eqs[3][7:9]))
+# 5th eq
+        copy_3_6 = eqs[3][6].copy()
+        copy_3_7 = eqs[3][7].copy()
+        self.play(FadeIn(eqs[4][5]))
+        self.play(eqs[3][0:5].animate.move_to(eqs[4][0:5]))
+        self.play(copy_3_6.animate.move_to(eqs[4][6]),
+                  FadeIn(eqs[4][7]), FadeIn(eqs[4][11]), Transform(copy_3_7, eqs[4][8:11]),
+                  eqs[3][8].animate.move_to(eqs[4][12]))
+# 6th eq
+        self.play(FadeIn(eqs[5][5]))
+        self.play(eqs[4][0:5].animate.move_to(eqs[5][0:5]))
+        self.play(eqs[4][6].animate.move_to(eqs[5][8]),
+                  eqs[4][9].animate.move_to(eqs[5][8]),
+                  eqs[4][10].animate.move_to(eqs[5][6]),
+                  Transform(VGroup(eqs[4][8], eqs[4][12]), eqs[5][7]),
+                  eqs[4][12].animate.move_to(eqs[5][9]))
+# 7th eq
+        self.play(FadeIn(eqs[6][3]))
+        self.play(eqs[5][2:5].animate.move_to(eqs[6][0:3]))
+        self.play(eqs[5][8:10].animate.move_to(eqs[6][4:6]))
+# 8th eq
+        self.play(FadeIn(eqs[7][2]))
+        self.play(eqs[6][1:3].animate.move_to(eqs[7][0:2]))
+        self.play(eqs[6][5].animate.move_to(eqs[7][3]))
+# 9th eq
+        copy_7_2 = eqs[7][2].copy()
+        self.play(eqs[7][0].animate.move_to(eqs[8][0]),
+                  copy_7_2.animate.move_to(eqs[8][1]),
+                  eqs[7][3].animate.move_to(eqs[8][2]),
+                  FadeIn(eqs[8][3]),
+                  eqs[7][1].animate.move_to(eqs[8][4]))
+        
+        self.add(eqs[8])
+        
+        conds = MathTex(r'V &> C \implies H = 1,\quad{} D = 0 \\',
+                        r'V &< C \implies H < 1,\quad{} D > 0 \\', font_size=FONT_SIZE_HAWK_DOVE)
+        conds2 = MathTex(r'H &> \frac{V}{C},\quad{} \text{playing Dove yields higher EV} \\',
+                         r'H &< \frac{V}{C},\quad{} \text{playing Hawk yields higher EV} \\', font_size=FONT_SIZE_HAWK_DOVE)
+        conclusion_h_d = Tex('Playing Dove can be a viable strategy. Individuals might be sharers for their own benefit.')
+        
+        index_labels(conds)
+        conds.next_to(eqs[8][3], 3*RIGHT)
+        conds[0].shift(0.2*UP)
+        conds[1].shift(0.2*DOWN)
+        brace = BraceBetweenPoints(conds.get_top(), conds.get_bottom()).next_to(conds, 0.8*LEFT)
+        resulting_conditions = VGroup(eqs[8], brace, conds)
+        self.play(GrowFromCenter(brace))
+        self.play(Write(conds[0]), Write(conds[1]))
+        self.play(FadeOut(eqs[0:8]), *[FadeOut(mob) for mob in [copy_0_0, copy_1_0, copy_0_1, copy_1_1, eqs1_copy, h_copy, d_copy, copy_3_6, copy_7_2, d_copy2, copy_3_7, eqs1_copy2]])
+        self.play(resulting_conditions.animate.to_edge(UL).shift(DOWN))
+
+        v_leq_c = conds[1][0:3].copy()
+
+
+        brace2 = BraceBetweenPoints(conds2.get_top(), conds2.get_bottom()).next_to(brace, 6*DOWN)
+        conds2[0].next_to(brace2, RIGHT).align_to(brace2, UP)
+        conds2[1].next_to(brace2, RIGHT).next_to(conds2[0], DOWN)
+        brace_copy = brace.copy()
+        conclusion_h_d.move_to(texts_target_for_future)
+        self.play(Transform(brace_copy, brace2), v_leq_c.animate.next_to(brace2, LEFT))
+        self.play(Write(conds2[0]))
+        self.play(Write(conds2[1]))
+
+        
+        self.wait()
