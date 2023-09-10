@@ -589,6 +589,13 @@ class Main(Scene):
         ax = Axes(x_range=[0, 12, 1], y_range=[0, 5, 1], x_length=6, y_length=2, tips=False, x_axis_config={"include_ticks": False}, y_axis_config={"include_ticks": False})
         ax.shift(4 * RIGHT + 1 * UP)
         ax2 = Axes(x_range=[0, 12, 1], y_range=[0, 5, 1], x_length=6, y_length=2, tips=False, x_axis_config={"include_ticks": False}, y_axis_config={"include_ticks": False}).next_to(ax, DOWN)
+        FONT_SIZE_AXES = 20
+        time = Text('Time', font_size=FONT_SIZE_AXES).next_to(ax2, DOWN)
+        rabbit_y = Text('Number of rabbits', font_size=FONT_SIZE_AXES).rotate(90)***
+        fox_y = Text('Number of foxes', font_size=FONT_SIZE_AXES).rotate(90)***
+        
+        rabbit_y.next_to(ax, LEFT)
+        fox_y.next_to(ax2, LEFT)
         
         rabbits_eq = MathTex(r'{dx \over dt} = \alpha x - \beta xy').next_to(ax, LEFT).shift(LEFT)
         foxes_eq = MathTex(r'{dy \over dt} = \gamma xy - \delta y').next_to(ax2, LEFT).align_to(rabbits_eq, LEFT)
@@ -625,10 +632,11 @@ class Main(Scene):
         self.play(*[FadeOut(VGroup(line1, line2)) for line1, line2 in pp_conds_mtex])
 
         self.play(FadeIn(ax),FadeIn(ax2))
-        xpos = ValueTracker(0)
-        self.add(prey, predator, line)
+        self.play(FadeIn(time))
+        self.play(FadeIn(rabbit_y), FadeIn(fox_y))
+        # self.add(prey, predator, line)
 
 
-        self.play(FadeIn(n_rabbits),FadeIn(n_foxes))
-        self.play(xpos.animate.set_value(10), run_time=3, rate_func=rate_functions.linear)
-        self.wait()
+        # self.play(FadeIn(n_rabbits),FadeIn(n_foxes))
+        # self.play(xpos.animate.set_value(10), run_time=3, rate_func=rate_functions.linear)
+        # self.wait()
